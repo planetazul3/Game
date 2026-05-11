@@ -1,3 +1,7 @@
-[gd_scene format=3]
+[gd_scene load_steps=2 format=3 uid="uid://ddyyl2a0txyw8"]
+
+[ext_resource type="PackedScene" uid="uid://cdx858qjytkig" path="res://scenes/camera/rts_camera.tscn" id="1_2"]
 
 [node name="Main" type="Node3D"]
+
+[node name="RTSCamera" parent="." instance=ExtResource("1_2")]
