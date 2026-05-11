@@ -1,0 +1,18 @@
+{
+  "name": "Solaris Dominion",
+  "type": "Technocratic",
+  "traits": [
+    "Shield Amplification",
+    "Drone Coordination",
+    "Energy Optimization"
+  ],
+  "starting_units": {
+    "workers": 6,
+    "scouts": 2,
+    "command_core": 1
+  },
+  "resources": {
+    "energy": 1000,
+    "alloys": 500
+  }
+}
