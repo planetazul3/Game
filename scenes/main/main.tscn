@@ -14,6 +14,7 @@
 [ext_resource type="Script" path="res://scripts/systems/formation_system.gd" id="12_for"]
 [ext_resource type="Script" path="res://scripts/ui/fog_of_war_manager.gd" id="13_fow"]
 [ext_resource type="Script" path="res://scripts/main_level.gd" id="14_main"]
+[ext_resource type="Script" path="res://scripts/navigation/flow_field_manager.gd" id="15_ffm"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_grnd"]
 size = Vector2(100, 100)
@@ -58,6 +59,12 @@ script = ExtResource("11_vis")
 
 [node name="FormationSystem" type="Node" parent="Systems"]
 script = ExtResource("12_for")
+
+[node name="FlowFieldManager" type="Node" parent="Systems"]
+script = ExtResource("15_ffm")
+field_width = 100
+field_height = 100
+cell_size = 1.0
 
 [node name="FogOfWarManager" type="Node" parent="Systems"]
 script = ExtResource("13_fow")

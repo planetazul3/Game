@@ -46,27 +46,25 @@ func _process_path_requests() -> void:
 		processed += 1
 
 func _follow_path(entity: Node, move_comp: MovementComponent, delta: float) -> void:
-	if move_comp.path_index >= move_comp.path.size():
+	var dir = Vector3.ZERO
+	
+	if move_comp.current_flow_field:
+		var ff_mgr = get_parent().get_node_or_null("FlowFieldManager")
+		if ff_mgr:
+			var grid_pos = ff_mgr.world_to_grid(move_comp.simulation_position)
+			var flow_dir = move_comp.current_flow_field.get_direction(grid_pos.x, grid_pos.y)
+			dir = Vector3(flow_dir.x, 0, flow_dir.y)
+			
+			# Arrival check
+			var dist_to_target = move_comp.simulation_position.distance_to(move_comp.target_position)
+			if dist_to_target < arrival_tolerance:
+				move_comp.has_target = false
+				return
+	
+	if dir.is_zero_approx():
+		# Fallback or stationary
 		move_comp.has_target = false
 		return
-
-	var target_waypoint = move_comp.path[move_comp.path_index]
-	var pos = entity.global_position
-	var dir = pos.direction_to(target_waypoint)
-	var dist = pos.distance_to(target_waypoint)
-
-	# If reached waypoint, move to next
-	if dist <= waypoint_tolerance:
-		move_comp.path_index += 1
-		if move_comp.path_index >= move_comp.path.size():
-			move_comp.has_target = false
-			if entity is CharacterBody3D:
-				entity.velocity = Vector3.ZERO
-			return
-		# Recalculate for next waypoint in same tick if needed? 
-		# For simplicity, just update target for next tick
-		target_waypoint = move_comp.path[move_comp.path_index]
-		dir = pos.direction_to(target_waypoint)
 
 	var intended_vel = dir * move_comp.move_speed
 	
@@ -78,7 +76,7 @@ func _follow_path(entity: Node, move_comp: MovementComponent, delta: float) -> v
 	next_pos = TransformIntegrator.resolve_collisions(entity, next_pos, 0.5, neighbors)
 	
 	move_comp.simulation_position = next_pos
-	entity.global_position = next_pos # Presentation sync (simplified)
+	entity.global_position = next_pos 
 	SpatialGrid.update_entity(entity, next_pos)
 
 	if intended_vel.length() > 0.1:
@@ -88,27 +86,20 @@ func _follow_path(entity: Node, move_comp: MovementComponent, delta: float) -> v
 func _on_command_issued(units: Array[Node], command_type: String, target: Variant) -> void:
 	if command_type == "move":
 		var target_pos = target as Vector3
-		
-		var formation_sys = get_parent().get_node_or_null("FormationSystem")
-		var offsets = {}
-		if formation_sys:
-			offsets = formation_sys.get_formation_offsets(units, 0) # BOX = 0
+		var ff_mgr = get_parent().get_node_or_null("FlowFieldManager")
+		var shared_ff = null
+		if ff_mgr:
+			shared_ff = ff_mgr.get_flow_field(target_pos)
 		
 		for unit in units:
 			if not is_instance_valid(unit): continue
 			var move_comp = unit.get("movement_component") as MovementComponent
 			if move_comp:
-				var offset = offsets.get(unit, Vector3.ZERO)
-				move_comp.target_position = target_pos + offset
+				move_comp.target_position = target_pos
 				move_comp.has_target = true
-				move_comp.is_path_ready = false
+				move_comp.is_path_ready = true
+				move_comp.current_flow_field = shared_ff
 				
-				var id = unit.get_meta("entity_id")
-				if id not in path_request_queue:
-					path_request_queue.append(id)
-				if unit not in entities_to_move:
-					entities_to_move.append(unit)
-
 				if unit not in entities_to_move:
 					entities_to_move.append(unit)
 

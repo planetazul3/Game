@@ -9,6 +9,7 @@ var acceleration: float = 10.0
 var path: PackedVector3Array = []
 var path_index: int = 0
 var is_path_ready: bool = false
+var current_flow_field: RefCounted = null # FlowField
 
 func save_state() -> Dictionary:
 	return {
