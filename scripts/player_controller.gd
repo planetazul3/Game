@@ -74,17 +74,25 @@ func _issue_move_command() -> void:
 	var from = camera.project_ray_origin(mouse_pos)
 	var to = from + camera.project_ray_normal(mouse_pos) * 1000.0
 	
-	# Raycast to ground (assume y=0 plane or use physics)
 	var space_state = get_world_3d().direct_space_state
 	var query = PhysicsRayQueryParameters3D.create(from, to)
 	var result = space_state.intersect_ray(query)
 	
 	if result:
-		var target_pos = result.position
-		_spawn_move_marker(target_pos)
-		for unit in selected_units:
-			if is_instance_valid(unit):
-				unit.move_to(target_pos)
+		var target_obj = result.collider
+		
+		# Check if we clicked an enemy unit
+		if target_obj.is_in_group("units") and target_obj.faction_id != 0:
+			for unit in selected_units:
+				if is_instance_valid(unit):
+					unit.attack(target_obj)
+		else:
+			# Just move to position
+			var target_pos = result.position
+			_spawn_move_marker(target_pos)
+			for unit in selected_units:
+				if is_instance_valid(unit):
+					unit.move_to(target_pos)
 
 func _spawn_move_marker(pos: Vector3) -> void:
 	var marker_scene = load("res://scenes/move_marker.tscn")
