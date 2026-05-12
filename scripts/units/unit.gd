@@ -5,12 +5,14 @@ var health_component: HealthComponent
 var visibility_component: VisibilityComponent
 var movement_component: MovementComponent
 var combat_component: CombatComponent
+var gatherer_component: GathererComponent
 
 func _init() -> void:
 	health_component = HealthComponent.new()
 	visibility_component = VisibilityComponent.new()
 	movement_component = MovementComponent.new()
 	combat_component = CombatComponent.new()
+	gatherer_component = GathererComponent.new()
 
 func _ready() -> void:
 	if EventBus:

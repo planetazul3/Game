@@ -10,12 +10,11 @@ func _ready() -> void:
 	pass
 
 func tick(delta: float) -> void:
-	var scene_units = get_tree().get_nodes_in_group("selectable")
-	for sel in scene_units:
-		var entity = sel.get_parent()
+	var entities = EntityManager.get_nodes_with_component("GathererComponent")
+	for entity in entities:
 		if not is_instance_valid(entity): continue
 
-		var gather_comp = entity.get_node_or_null("GathererComponent")
+		var gather_comp = entity.get("gatherer_component") as GathererComponent
 		if not gather_comp or not is_instance_valid(gather_comp.target_resource): continue
 
 		var target = gather_comp.target_resource

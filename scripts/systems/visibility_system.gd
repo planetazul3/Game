@@ -23,14 +23,13 @@ func tick(delta: float) -> void:
 	_recalculate_visibility()
 
 func _recalculate_visibility() -> void:
-	var scene_units = get_tree().get_nodes_in_group("selectable")
+	var entities = EntityManager.get_nodes_with_component("VisibilityComponent")
 
 	# 1. Update Spatial Grid
 	_spatial_grid.clear()
 	var player_vision_sources: Array[Node] = []
 
-	for sel in scene_units:
-		var entity = sel.get_parent()
+	for entity in entities:
 		if not is_instance_valid(entity): continue
 
 		var vis_comp = entity.get("visibility_component") as VisibilityComponent
@@ -50,8 +49,7 @@ func _recalculate_visibility() -> void:
 			player_vision_sources.append(entity)
 
 	# 2. Re-evaluate all non-player entities for visibility without toggling
-	for sel in scene_units:
-		var entity = sel.get_parent()
+	for entity in entities:
 		if not is_instance_valid(entity): continue
 
 		var vis_comp = entity.get("visibility_component") as VisibilityComponent

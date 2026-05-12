@@ -7,11 +7,8 @@ func _ready() -> void:
 	pass
 
 func tick(delta: float) -> void:
-	var scene_units = get_tree().get_nodes_in_group("selectable")
-	for sel in scene_units:
-		var entity = sel.get_parent()
-		if not is_instance_valid(entity): continue
-
+	var entities = EntityManager.get_nodes_with_component("CombatComponent")
+	for entity in entities:
 		var combat_comp = entity.get("combat_component") as CombatComponent
 		if not combat_comp: continue
 
@@ -26,12 +23,8 @@ func tick(delta: float) -> void:
 					_process_damage(entity, target, combat_comp.attack_damage)
 					combat_comp.attack_cooldown = 1.0 / combat_comp.attack_speed
 			else:
-				var move_comp = entity.get("movement_component") as MovementComponent
-				if move_comp:
-					move_comp.target_position = target.global_position
-					move_comp.has_target = true
-
-					EventBus.combat_interrupt_movement.emit(entity.get_instance_id(), target.global_position)
+				# Rule 4: System communication via EventBus ONLY
+				EventBus.combat_interrupt_movement.emit(entity.get_instance_id(), target.global_position)
 
 		else:
 			combat_comp.target = null
