@@ -9,7 +9,7 @@ var resources: Dictionary = {
 func _ready() -> void:
 	pass
 
-func simulation_tick(delta: float) -> void:
+func tick(delta: float) -> void:
 	var scene_units = get_tree().get_nodes_in_group("selectable")
 	for sel in scene_units:
 		var entity = sel.get_parent()

@@ -14,7 +14,7 @@ var update_interval: float = 0.5 # Throttle recalculations
 func _ready() -> void:
 	pass
 
-func simulation_tick(delta: float) -> void:
+func tick(delta: float) -> void:
 	update_timer -= delta
 	if update_timer > 0:
 		return

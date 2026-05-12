@@ -11,7 +11,7 @@ func _ready() -> void:
 	EventBus.combat_interrupt_movement.connect(_on_combat_interrupt_movement)
 
 
-func simulation_tick(delta: float) -> void:
+func tick(delta: float) -> void:
 	pathfinding_throttle_timer -= delta
 	var can_pathfind = pathfinding_throttle_timer <= 0
 	if can_pathfind:
