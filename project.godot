@@ -23,6 +23,8 @@ GameState="*res://scripts/core/game_state.gd"
 EventBus="*res://scripts/core/event_bus.gd"
 EntityManager="*res://scripts/core/entity_manager.gd"
 DeterministicRandom="*res://scripts/core/deterministic_random.gd"
+WorldGenerator="*res://scripts/core/world_generator.gd"
+FactionLoader="*res://scripts/core/faction_loader.gd"
 
 [display]
 

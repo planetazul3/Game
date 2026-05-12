@@ -17,3 +17,6 @@ func randi() -> int:
 
 func randi_range(from: int, to: int) -> int:
 	return _rng.randi_range(from, to)
+
+func get_seed() -> int:
+	return _rng.seed
