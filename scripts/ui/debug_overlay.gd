@@ -10,6 +10,9 @@ extends CanvasLayer
 @onready var vis_cells_label: Label = $MarginContainer/VBoxContainer/VisibleCellsLabel
 @onready var event_bus_label: Label = $MarginContainer/VBoxContainer/EventBusLabel
 @onready var memory_label: Label = $MarginContainer/VBoxContainer/MemoryLabel
+@onready var step_time_label: Label = $MarginContainer/VBoxContainer/StepTimeLabel
+@onready var spatial_metrics_label: Label = $MarginContainer/VBoxContainer/SpatialMetricsLabel
+@onready var system_timings_label: Label = $MarginContainer/VBoxContainer/SystemTimingsLabel
 
 var _event_count := 0
 var _event_timer := 0.0
@@ -41,8 +44,15 @@ func _process(delta: float) -> void:
 	var sim_sys = get_tree().current_scene.get_node_or_null("Systems/SimulationManager")
 	if sim_sys:
 		tick_label.text = "Tick: " + str(sim_sys.current_tick)
+		step_time_label.text = "Step: %.2fms" % sim_sys.last_step_ms
+		
+		var sys_text = "Systems:\n"
+		for sys_name in sim_sys.system_timings:
+			sys_text += "  %s: %.2fms\n" % [sys_name, sim_sys.system_timings[sys_name]]
+		system_timings_label.text = sys_text
 
 	unit_label.text = "Units: " + str(EntityManager._entities.size())
+	spatial_metrics_label.text = "Spatial Q/U: %d / %d" % [SpatialGrid.query_count, SpatialGrid.update_count]
 
 	var sel_sys = get_tree().current_scene.get_node_or_null("Systems/SelectionSystem")
 	if sel_sys:

@@ -8,6 +8,13 @@ var _grid: Dictionary = {}
 # _entity_cells[entity] = cell_coords
 var _entity_cells: Dictionary = {}
 
+var query_count: int = 0
+var update_count: int = 0
+
+func reset_metrics() -> void:
+	query_count = 0
+	update_count = 0
+
 func insert_entity(entity: Node, position: Vector3) -> void:
 	if not is_instance_valid(entity): return
 	
@@ -32,6 +39,7 @@ func remove_entity(entity: Node) -> void:
 func update_entity(entity: Node, position: Vector3) -> void:
 	if not is_instance_valid(entity): return
 	
+	update_count += 1
 	var new_cell = _get_cell_coords(position)
 	var old_cell = _entity_cells.get(entity, Vector2i(-999999, -999999))
 	
@@ -40,6 +48,7 @@ func update_entity(entity: Node, position: Vector3) -> void:
 		insert_entity(entity, position)
 
 func query_radius(position: Vector3, radius: float) -> Array[Node]:
+	query_count += 1
 	var result: Array[Node] = []
 	var min_cell = _get_cell_coords(position - Vector3(radius, 0, radius))
 	var max_cell = _get_cell_coords(position + Vector3(radius, 0, radius))

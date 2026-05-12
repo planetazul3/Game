@@ -55,14 +55,21 @@ func _process(delta: float) -> void:
 		_simulation_step(TICK_DELTA)
 		accumulator -= TICK_DELTA
 
+var system_timings: Dictionary = {}
+var last_step_ms: float = 0.0
+
 func _simulation_step(delta_fixed: float) -> void:
+	SpatialGrid.reset_metrics()
+	var step_start = Time.get_ticks_usec()
 	current_tick += 1
 	
 	# Consume commands for this tick
 	var tick_commands = command_buffer.consume_tick_commands(current_tick)
 	
-	# Distribute commands to systems (primarily CommandSystem)
+	# Distribute commands to systems
 	for system in _ordered_systems:
+		var sys_start = Time.get_ticks_usec()
+		
 		if system is CommandSystem:
 			system.process_commands(tick_commands)
 		
@@ -70,12 +77,16 @@ func _simulation_step(delta_fixed: float) -> void:
 			system.tick(delta_fixed)
 		elif system.has_method("simulation_tick"):
 			system.simulation_tick(delta_fixed)
+			
+		system_timings[system.name] = (Time.get_ticks_usec() - sys_start) / 1000.0
 
 	# Evaluate victory conditions deterministically every second (30 ticks)
 	if not _match_ended and current_tick % 30 == 0:
 		for vc in _victory_conditions:
 			if vc.evaluate(self):
 				_on_victory_condition_met(0, "Condition Met")
+				
+	last_step_ms = (Time.get_ticks_usec() - step_start) / 1000.0
 
 func seed_simulation(simulation_seed: int) -> void:
 	var deterministic_rng = get_node_or_null("/root/DeterministicRandom")

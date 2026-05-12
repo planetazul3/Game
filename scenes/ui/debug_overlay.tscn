@@ -59,6 +59,18 @@ text = "Events/s: 0"
 layout_mode = 2
 text = "Mem: 0 MB"
 
+[node name="StepTimeLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Step: 0ms"
+
+[node name="SpatialMetricsLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Spatial Q/U: 0/0"
+
+[node name="SystemTimingsLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Systems: ..."
+
 [node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
