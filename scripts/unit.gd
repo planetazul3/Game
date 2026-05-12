@@ -75,15 +75,19 @@ func _update_hp_bar() -> void:
 	sb.bg_color = color
 	hp_bar.add_theme_stylebox_override("fill", sb)
 
-func move_to(pos: Vector3) -> void:
+var is_attack_moving: bool = false
+
+func move_to(pos: Vector3, attack_move: bool = false) -> void:
 	var offset = Vector3(randf_range(-1.0, 1.0), 0, randf_range(-1.0, 1.0))
 	target_position = pos + offset
 	target_unit = null
+	is_attack_moving = attack_move
 	current_state = State.MOVE
 	nav_agent.set_target_position(target_position)
 
 func attack(target: Node3D) -> void:
 	target_unit = target
+	is_attack_moving = false
 	current_state = State.ATTACK
 
 func take_damage(amount: int) -> void:
@@ -125,7 +129,7 @@ func _play_sound(path: String) -> void:
 func _process_idle(_delta: float) -> void:
 	var units = get_tree().get_nodes_in_group("units")
 	var nearest_enemy = null
-	var min_dist = 30.0 # Increased from 15.0
+	var min_dist = 30.0
 	
 	for unit in units:
 		if unit.faction_id != faction_id:
@@ -139,9 +143,17 @@ func _process_idle(_delta: float) -> void:
 		attack(nearest_enemy)
 
 func _process_move(delta: float) -> void:
+	if is_attack_moving:
+		# Scan for enemies while moving
+		var units = get_tree().get_nodes_in_group("units")
+		for unit in units:
+			if unit.faction_id != faction_id and global_position.distance_to(unit.global_position) < 15.0:
+				attack(unit)
+				return
+
 	if nav_agent.is_navigation_finished():
 		current_state = State.IDLE
-		mesh.scale = mesh.scale.lerp(Vector3.ONE, delta * 10.0) # Reset scale
+		mesh.scale = mesh.scale.lerp(Vector3.ONE, delta * 15.0)
 		return
 
 	var next_path_pos: Vector3 = nav_agent.get_next_path_position()
@@ -150,10 +162,11 @@ func _process_move(delta: float) -> void:
 	var push = _calculate_separation()
 	new_velocity += push * 4.0
 	
-	velocity = velocity.lerp(new_velocity, delta * 8.0)
+	# Mass-based acceleration (lower multiplier = heavier feel)
+	velocity = velocity.lerp(new_velocity, delta * 6.0) 
 	move_and_slide()
 	
-	# Procedural "Running" animation (Squish/Stretch)
+	# Procedural walk animation
 	var walk_cycle = sin(Time.get_ticks_msec() * 0.015) * 0.1
 	mesh.scale.y = 1.0 + walk_cycle
 	mesh.scale.x = 1.0 - walk_cycle
@@ -173,13 +186,28 @@ func _process_attack(delta: float) -> void:
 		nav_agent.set_target_position(target_unit.global_position)
 		_process_move(delta)
 	else:
-		velocity = velocity.lerp(Vector3.ZERO, delta * 10.0)
+		# Decelerate to stop
+		velocity = velocity.lerp(Vector3.ZERO, delta * 15.0)
 		move_and_slide()
 		
+		# Look at target
+		var look_target = target_unit.global_position
+		look_at(Vector3(look_target.x, global_position.y, look_target.z), Vector3.UP)
+		
 		attack_timer -= delta
-		if attack_timer <= 0:
+		
+		# Attack Anticipation (Windup)
+		if attack_timer < 0.2 and attack_timer > 0:
+			# Squish down before firing
+			mesh.scale = mesh.scale.lerp(Vector3(1.2, 0.8, 1.2), delta * 20.0)
+		elif attack_timer <= 0:
 			_fire_projectile()
 			attack_timer = attack_cooldown
+			# Kickback effect
+			mesh.scale = Vector3(0.8, 1.4, 0.8)
+		else:
+			# Reset scale during cooldown
+			mesh.scale = mesh.scale.lerp(Vector3.ONE, delta * 10.0)
 
 func _fire_projectile() -> void:
 	var bullet_scene = load("res://scenes/bullet.tscn")

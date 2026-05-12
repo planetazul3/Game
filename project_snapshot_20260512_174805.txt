@@ -1,0 +1,2360 @@
+====================================================================================================
+PROJECT SOURCE CONSOLIDATION REPORT
+====================================================================================================
+
+Project           : Game
+Description       : Godot 4 Project — Source Consolidation
+Generated UTC     : 2026-05-12T22:48:05.389643+00:00
+Git Branch        : main
+Git Commit        : cd17115
+Commit Date       : 2026-05-12 17:44:32 -0500
+Root              : /home/planetazul3/dev/Game
+Python            : 3.12.3
+Platform          : linux
+
+====================================================================================================
+PROJECT STRUCTURE
+====================================================================================================
+
+├── .antigravity
+│   ├── config.json
+│   └── instructions.md
+├── .github
+│   ├── ISSUE_TEMPLATE
+│   │   ├── bug_report.md
+│   │   └── feature_request.md
+│   ├── workflows
+│   │   └── ci.yml
+│   └── pull_request_template.md
+├── assets
+│   ├── textures
+│   └── ui
+├── docs
+│   ├── architecture
+│   │   ├── fog_of_war_spec.md
+│   │   └── multiplayer_model.md
+│   ├── AI_DEV_PROMPT.md
+│   ├── ARCHITECTURE.md
+│   ├── ARCHITECTURE_DIAGRAM.md
+│   ├── CONTENT_PIPELINE.md
+│   ├── EXECUTION_FLOW.md
+│   ├── LOCKSTEP_GUIDE.md
+│   ├── PERFORMANCE_GUIDE.md
+│   ├── REPLAY_SYSTEM.md
+│   ├── ROADMAP.md
+│   ├── SYSTEM_DEPENDENCIES.md
+│   ├── SYSTEMS.md
+│   ├── TECH_STACK.md
+│   ├── TECHNICAL_DEBT.md
+│   └── USER_STORIES.md
+├── scenes
+│   ├── attack_marker.tscn
+│   ├── bullet.tscn
+│   ├── death_particles.tscn
+│   ├── game_ui.tscn
+│   ├── move_marker.tscn
+│   ├── test_map.tscn
+│   └── unit.tscn
+├── scripts
+│   ├── game_ui.gd
+│   ├── player_controller.gd
+│   ├── rts_camera.gd
+│   └── unit.gd
+├── .gdlintrc
+├── .gitignore
+├── CHANGELOG.md
+├── consolidate.py
+├── CONTRIBUTING.md
+├── export_presets.cfg
+├── export_presets.cfg.example
+├── LICENSE
+├── project.godot
+└── README.md
+
+====================================================================================================
+FILES
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+FILE        : .antigravity/config.json
+LANGUAGE    : JSON
+SIZE        : 740 bytes
+SHA256      : d4a386b693372e1c653df0ac429f7507e0f1b60c6c73261df6775ad5df4a0c80
+LINES       : 21
+----------------------------------------------------------------------------------------------------
+
+{
+  "project_name": "Godot 4 Game",
+  "version": "1.0.0",
+  "agent_config": {
+    "preferred_mempalace_wing": "wing_godot_game",
+    "system_patterns": {
+      "decoupling": "EventBus",
+      "core_scripts": "scripts/core/",
+      "systems": "scripts/systems/",
+      "components": "scripts/components/"
+    },
+    "guidelines": [
+      "Always use type hints in GDScript.",
+      "Prefer EventBus signals over direct node references for inter-system communication.",
+      "Use Vector3 for all world-space calculations.",
+      "Enforce atomic commits and always push to origin.",
+      "Review CI status and fix any lint/build errors immediately.",
+      "Maintain a professional, complete-solution approach (anti-laziness)."
+    ]
+  }
+}
+
+----------------------------------------------------------------------------------------------------
+FILE        : .antigravity/instructions.md
+LANGUAGE    : Markdown
+SIZE        : 2,279 bytes
+SHA256      : c7abf79714b6cdbeb45d75d64e3e32e54adc23f3c306a790c348517390b0bb30
+LINES       : 31
+----------------------------------------------------------------------------------------------------
+
+# Agentic Development Instructions - Godot 4 Game
+
+You are working on a Godot 4 project structured with a component-based architecture and decoupled systems.
+
+## Core Principles
+1. **Decoupling**: Never allow systems (e.g., `CombatSystem`, `MovementSystem`) to reference each other directly. Use `scripts/core/event_bus.gd` to communicate via signals.
+2. **Type Safety**: Use static typing for all variables, constants, and function parameters/return types.
+3. **3D Consistency**: The game is 3D. Always use `Vector3` for spatial coordinates unless specifically working on 2D UI.
+4. **Verification**: After modifying scripts, verify them using `godot --headless --path . --check-only` or `gdlint`.
+
+## Agentic Behavior & Professional Standards
+1. **Atomic Commits**: Every logical change must be committed separately with a clear, descriptive message following Conventional Commits.
+2. **Synchronized State**: Always `git push` after a successful commit to ensure the remote repository reflects the latest progress.
+3. **CI/CD Vigilance**: Before finishing a task, check the status of the CI pipeline. If a change breaks the build or linting, it is your responsibility to fix it immediately.
+4. **Professionalism & Quality**: Maintain a high standard of professional communication and code quality. Avoid placeholders, "TODOs" without tracking, or incomplete implementations.
+5. **Anti-Laziness Policy**: Never cut corners. Provide complete, verified solutions. Do not ask the user to "fill in the blanks" for core logic. Research thoroughly before making architectural decisions.
+6. **MemPalace Integration**: Consistently update the Palace with key decisions to maintain long-term project intelligence.
+
+## Project Structure
+- `scripts/core/`: Autoloads and global managers (EventBus).
+- `scripts/systems/`: High-level logic systems that process components.
+- `scripts/components/`: Data containers (`RefCounted`) attached to entities.
+- `scenes/`: Godot scenes and prefabs.
+
+## MemPalace
+- All architectural decisions and session history should be stored in `wing_godot_game`.
+- Use the knowledge graph to track entity relationships.
+
+## Git Workflow
+- Perform atomic commits for every logical step.
+- Follow conventional commit messages (`feat:`, `fix:`, `refactor:`, etc.).
+
+----------------------------------------------------------------------------------------------------
+FILE        : .gdlintrc
+LANGUAGE    : Text
+SIZE        : 78 bytes
+SHA256      : 2ce13bbfa17893616709ef233ff1052d8ea74549a71f4c352e70467a12ad87ee
+LINES       : 4
+----------------------------------------------------------------------------------------------------
+
+max-line-length: 120
+disable:
+  - class-definitions-order
+  - max-line-length
+
+----------------------------------------------------------------------------------------------------
+FILE        : .github/ISSUE_TEMPLATE/bug_report.md
+LANGUAGE    : Markdown
+SIZE        : 577 bytes
+SHA256      : 7ec704ea51beb956cf9d9f5f3284dddcf1accd6b23323c191812fc8504d0c7c0
+LINES       : 29
+----------------------------------------------------------------------------------------------------
+
+---
+name: Bug Report
+about: Create a report to help us improve
+title: ''
+labels: ''
+assignees: ''
+
+---
+
+**Describe the bug**
+A clear and concise description of what the bug is.
+
+**Godot version**
+[e.g. 4.4-stable]
+
+**Explicit reproduction steps**
+1. Go to '...'
+2. Click on '....'
+3. Scroll down to '....'
+4. See error
+
+**Expected behavior**
+A clear and concise description of what you expected to happen.
+
+**Screenshots/Video**
+If applicable, add screenshots or a short video to help explain your problem.
+
+**Additional context**
+Add any other context about the problem here.
+
+----------------------------------------------------------------------------------------------------
+FILE        : .github/ISSUE_TEMPLATE/feature_request.md
+LANGUAGE    : Markdown
+SIZE        : 595 bytes
+SHA256      : 8aed8bfc171280b201ce6f1a5fd0a33785f373f4731c0ea113717d6fb82417fa
+LINES       : 20
+----------------------------------------------------------------------------------------------------
+
+---
+name: Feature Request
+about: Suggest an idea for this project
+title: ''
+labels: ''
+assignees: ''
+
+---
+
+**Is your feature request related to a problem? Please describe.**
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+
+**Describe the solution you'd like**
+A clear and concise description of what you want to happen.
+
+**Describe alternatives you've considered**
+A clear and concise description of any alternative solutions or features you've considered.
+
+**Additional context**
+Add any other context or screenshots about the feature request here.
+
+----------------------------------------------------------------------------------------------------
+FILE        : .github/pull_request_template.md
+LANGUAGE    : Markdown
+SIZE        : 2,034 bytes
+SHA256      : 8b68c1c0b015d9c7e7bdb9307b926cc5932cb5a0eab6ead5b8b3e5ab7edca918
+LINES       : 36
+----------------------------------------------------------------------------------------------------
+
+## Description
+Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context.
+
+Fixes # (issue)
+
+## Architectural Checklist Verification
+Please review and check off the following architectural constraints to ensure adherence to our project guidelines:
+- [ ] Code adheres to ECS-like architecture where components are pure data containers and logic resides in centralized systems.
+- [ ] Gameplay logic does not rely on Godot's `_process()` frame-dependent updates; it uses the custom fixed-tick `SimulationManager`.
+- [ ] Core input map actions (e.g. `unit_select`, `unit_command`) are used appropriately.
+- [ ] The system maintains a deterministic RTS environment (e.g., uses fixed-tick simulation and seeded PRNG).
+- [ ] Decoupled communication is achieved via the `EventBus`.
+- [ ] Centralized entity lifecycle management is handled via the `EntityManager`.
+- [ ] Any UI rendering mask modifications are explicitly scoped per the `CanvasItem` and `SubViewport` visibility masking architecture.
+- [ ] Scripts are placed in the appropriate directory structure under `scripts/`.
+
+## Type of change
+- [ ] Bug fix (non-breaking change which fixes an issue)
+- [ ] New feature (non-breaking change which adds functionality)
+- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] This change requires a documentation update
+
+## How Has This Been Tested?
+Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
+
+- [ ] Test A
+- [ ] Test B
+
+## Checklist:
+- [ ] My code follows the style guidelines of this project
+- [ ] I have performed a self-review of my own code
+- [ ] I have commented my code, particularly in hard-to-understand areas
+- [ ] I have made corresponding changes to the documentation
+- [ ] My changes generate no new warnings
+- [ ] I have added tests that prove my fix is effective or that my feature works
+- [ ] New and existing unit tests pass locally with my changes
+
+----------------------------------------------------------------------------------------------------
+FILE        : .github/workflows/ci.yml
+LANGUAGE    : YAML
+SIZE        : 2,364 bytes
+SHA256      : 08b0b74b7f93835380d89e31377377bb17548675a3cb597afe4272a99055fe81
+LINES       : 121
+----------------------------------------------------------------------------------------------------
+
+name: Godot CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+env:
+  GODOT_VERSION: "4.4.0"
+
+jobs:
+  lint:
+    name: Lint GDScript
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-gdtoolkit
+
+      - name: Install gdtoolkit
+        run: |
+          python -m pip install --upgrade pip
+          pip install "gdtoolkit==4.*"
+
+      - name: Run gdlint
+        run: |
+          gdlint scripts/ scenes/
+
+  validate-project:
+    name: Validate Godot Project
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+          include-templates: true
+
+      - name: Import Assets
+        run: |
+          godot \
+          --headless \
+          --editor \
+          --quit
+
+      - name: Validate GDScript Parsing
+        run: |
+          godot \
+          --headless \
+          --path . \
+          --check-only
+
+      - name: Validate Project
+        run: |
+          godot \
+          --headless \
+          --path . \
+          --quit
+
+  export-linux:
+    name: Export Linux Build
+    runs-on: ubuntu-latest
+
+    needs:
+      - lint
+      - validate-project
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Godot
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+          include-templates: true
+
+      - name: Import Assets
+        run: |
+          godot \
+          --headless \
+          --editor \
+          --quit
+
+      - name: Create Build Directory
+        run: mkdir -p builds/linux
+
+      - name: Export Linux
+        run: |
+          godot \
+          --headless \
+          --path . \
+          --export-release "Linux" \
+          builds/linux/game.x86_64
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build
+          path: builds/linux/
+
+----------------------------------------------------------------------------------------------------
+FILE        : .gitignore
+LANGUAGE    : Text
+SIZE        : 151 bytes
+SHA256      : acf6365e3f71d9a7facd58b440fcd25976ff2421f7118c5abcb797817a60ddce
+LINES       : 17
+----------------------------------------------------------------------------------------------------
+
+# Godot 4+ specific ignores
+.godot/
+.import/
+*.tmp
+
+# UID files
+*.uid
+*.tres.uid
+
+# IDEs
+.vscode/
+.idea/
+
+# Addons and builds
+addons/*/
+builds/
+.venv/
+
+----------------------------------------------------------------------------------------------------
+FILE        : CHANGELOG.md
+LANGUAGE    : Markdown
+SIZE        : 555 bytes
+SHA256      : 9df08bca21eeb932dba4cc282877fd38a69af7719e04e6519ebfb48f25e4900a
+LINES       : 14
+----------------------------------------------------------------------------------------------------
+
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- Issue templates for bug reports and feature requests.
+- Pull request template enforcing architectural checklist verification.
+- Documentation for multiplayer model (lockstep vs state-sync).
+- Documentation for fog of war specification (CanvasItem and SubViewport masking).
+
+----------------------------------------------------------------------------------------------------
+FILE        : CONTRIBUTING.md
+LANGUAGE    : Markdown
+SIZE        : 821 bytes
+SHA256      : ea6faa4a6784957b019196093ec190dd5516ec3b4e42a032b26e2a4c4a124f94
+LINES       : 19
+----------------------------------------------------------------------------------------------------
+
+# Contributing
+
+Thank you for contributing! Please follow these guidelines:
+
+## Engine Version
+All contributions must be compatible with **Godot 4.4**. When testing or running scripts from the CLI, ensure you are using the `godot4.4` command.
+
+## Naming Conventions
+- Use `snake_case` for all file names, directory names, variables, functions, and GDScript code.
+- Node names in the Godot scene tree should use `PascalCase`.
+- Class names in GDScript should use `PascalCase`.
+
+## Pull Requests
+- All changes must be submitted via Pull Requests.
+- Use the following branch structure for your pull requests:
+  - `feature/<feature-name>` for new features.
+  - `bugfix/<bug-name>` for bug fixes.
+  - `hotfix/<fix-name>` for urgent fixes.
+- Ensure all CI checks (such as `gdlint` and exports) pass before requesting a review.
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/AI_DEV_PROMPT.md
+LANGUAGE    : Markdown
+SIZE        : 1,501 bytes
+SHA256      : 15dc47ce83033c3bb0d5e9350e9c9d8dc52dcf4660295c3bedde418fdc74748a
+LINES       : 63
+----------------------------------------------------------------------------------------------------
+
+# AI Developer Continuation Prompt
+
+You are a Senior Game Systems Architect and Godot 4 RTS Engineer.
+
+You are continuing development of the repository `planetazul3/Game`.
+
+The project is a Linux-first real-time strategy and exploration game with procedural systems and two initial factions:
+
+- Solaris Dominion
+- Umbral Collective
+
+Your responsibilities:
+
+- Maintain production-grade architecture
+- Preserve modularity and scalability
+- Keep systems data-driven where possible
+- Prioritize deterministic RTS systems
+- Design for future multiplayer support
+- Maintain clean scene hierarchy and naming consistency
+- Use Godot 4 best practices
+- Avoid tightly coupled systems
+
+Current priorities:
+
+1. RTS camera controller
+2. Unit selection system
+3. Command issuing system
+4. Navigation/pathfinding
+5. Fog of war
+6. Resource harvesting
+7. AI-controlled enemy behavior
+8. Procedural exploration sectors
+9. UI/HUD framework
+10. Save/load architecture
+
+Code standards:
+
+- Clear naming conventions
+- Typed GDScript where possible
+- Modular scene composition
+- Avoid monolithic scripts
+- Separate gameplay logic from presentation
+- Maintain Linux compatibility
+
+Folder conventions:
+
+- scenes/
+- scripts/
+- assets/
+- data/
+- ui/
+- audio/
+
+Always:
+
+- update documentation when adding systems
+- create reusable systems
+- include TODO comments for unfinished systems
+- preserve future extensibility
+
+Development philosophy:
+
+"Strategic depth, exploration tension, modular AI systems, Linux-native reliability."
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/ARCHITECTURE.md
+LANGUAGE    : Markdown
+SIZE        : 1,029 bytes
+SHA256      : d0ddb60397df0400a21dd4c410792264813415f6092355d6d6969220f5da8b35
+LINES       : 61
+----------------------------------------------------------------------------------------------------
+
+# Software Architecture
+
+## Engine
+
+- Godot 4.x
+- GDScript primary scripting layer
+- Optional Python/Rust integration for advanced AI systems
+
+## Core Design Principles
+
+- Modular systems
+- Data-driven faction design
+- Linux-first compatibility
+- Deterministic simulation where possible
+- Future multiplayer readiness
+
+## High-Level Modules
+
+### Gameplay Layer
+
+- Unit controller
+- Combat system
+- Economy system
+- Exploration system
+- Fog of war
+
+### AI Layer
+
+- Tactical AI
+- Strategic AI
+- Behavior trees
+- Reinforcement-learning experimentation layer
+
+### World Layer
+
+- Procedural map generation
+- Terrain sectors
+- Environmental events
+
+### Presentation Layer
+
+- UI/HUD
+- Audio manager
+- Visual effects
+- Animation system
+
+## Data Architecture
+
+JSON-driven faction and gameplay configuration.
+
+## Future Networking Considerations
+
+- Lockstep RTS synchronization
+- Snapshot validation
+- Deterministic command simulation
+
+## Performance Goals
+
+- Linux native support
+- Steam Deck compatibility
+- Stable 60 FPS minimum target
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/architecture/fog_of_war_spec.md
+LANGUAGE    : Markdown
+SIZE        : 2,200 bytes
+SHA256      : 4fca7d4755d9c4e96827888557945d5660496e60de75f94e56676ed79d82bdd0
+LINES       : 32
+----------------------------------------------------------------------------------------------------
+
+# Fog of War Architecture Specification
+
+## Overview
+This document specifies the required architecture for the Fog of War system in the game. It defines how visibility is calculated and rendered efficiently, supporting exploration and line-of-sight without relying on full-map recalculations every tick.
+
+## Visibility States
+The system must support the following strict visibility states for any given area:
+1. **UNEXPLORED:** Black, totally hidden area.
+2. **EXPLORED:** Area that was previously seen but is currently not in active line-of-sight. Usually rendered with a darkening overlay ("shroud").
+3. **VISIBLE:** Area currently within the active line-of-sight of allied units. Fully visible.
+
+## Performance and Partitioning Constraint
+Fog of War updates must avoid full-map recalculations every game tick.
+- **Chunk/Grid Partitioning:** The map must be divided into a grid or chunks. Visibility logic should only process updates for cells/chunks affected by moving units.
+
+## Rendering Architecture: CanvasItem and SubViewport Masking
+The visual representation of Fog of War leverages Godot's 2D rendering features.
+
+### Required Approach
+1. **SubViewport as a Mask Generator:**
+   - A dedicated `SubViewport` should be used to render the "visibility map."
+   - Active units draw their sight radiuses (using simple shapes, e.g., circles) onto this `SubViewport`.
+   - This viewport acts as a dynamic mask representing the `VISIBLE` state.
+
+2. **CanvasItem Material / Shaders:**
+   - The game world (or a screen-covering overlay) applies a custom shader via `CanvasItem` materials.
+   - The shader takes the texture generated by the `SubViewport` as an input uniform.
+   - Using this mask texture, the shader determines per-pixel whether to render the map fully, apply an `EXPLORED` tint, or render pure black for `UNEXPLORED`.
+
+### Explicit Directives
+- **Do not** use large numbers of individual `Sprite2D` or `Light2D` nodes spanning the entire map to fake fog, as this scales poorly.
+- Any UI or rendering mask modifications related to the Fog of War **must** be explicitly scoped within this `CanvasItem` and `SubViewport` masking architecture to maintain performance and maintainability.
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/architecture/multiplayer_model.md
+LANGUAGE    : Markdown
+SIZE        : 1,877 bytes
+SHA256      : 5cd6c9452699ede8a48a1eb678306b0013b74744e6c939dd58c18c42a41a02c3
+LINES       : 20
+----------------------------------------------------------------------------------------------------
+
+# Multiplayer Model Architecture
+
+## Overview
+This document defines the architectural constraints and design philosophy for handling multiplayer in our Real-Time Strategy (RTS) game.
+
+## Core Constraint: Lockstep vs. State-Sync
+Due to the sheer number of entities typically present in an RTS environment and the requirement for precise, deterministic simulation, this project enforces a **Lockstep** networking architecture over a State-Sync architecture.
+
+### Why Lockstep?
+- **Bandwidth Efficiency:** In a lockstep model, only player inputs (commands) are sent over the network, rather than the state of thousands of individual units.
+- **Determinism Requirement:** Every client must simulate the exact same game state given the same inputs and initial state. This demands strict determinism across all simulation logic.
+- **Fairness & Consistency:** A fixed-tick simulation ensures that gameplay logic executes uniformly, independent of varied client framerates.
+
+### Architectural Rules
+1. **No Frame-Dependent Logic:** Game logic must never rely on Godot's `_process()` function. All gameplay logic must be executed within the custom, fixed-tick `SimulationManager`.
+2. **Deterministic Inputs:** Actions, random number generation, and navigation must be strictly deterministic. We utilize a seeded PRNG (`DeterministicRandom`) to ensure cross-client consistency.
+3. **Decoupled Simulation & Presentation:** The visual representation (rendering/animation) must be completely decoupled from the underlying logic. The `SimulationManager` ticks at a fixed rate, while presentation interpolation handles smooth rendering.
+
+## Future Implementations
+Any future features or systems must be reviewed against this lockstep model to ensure they do not introduce non-deterministic behavior or rely on state synchronization that would break the bandwidth and consistency constraints.
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/ARCHITECTURE_DIAGRAM.md
+LANGUAGE    : Markdown
+SIZE        : 1,240 bytes
+SHA256      : 73295da9208e8c9c497dc5a4293d4c20294bb0687296062ced9269edf357ab40
+LINES       : 45
+----------------------------------------------------------------------------------------------------
+
+# Architecture Diagram
+
+```mermaid
+graph TD;
+    subgraph Engine Layer
+        Godot[Godot 4 Engine]
+    end
+
+    subgraph Core
+        SimulationManager[Simulation Manager]
+        EventBus[Event Bus (AutoLoad)]
+        EntityManager[Entity Manager (AutoLoad)]
+        DeterministicRandom[Seeded PRNG (AutoLoad)]
+    end
+
+    subgraph Systems (Ticked by SimulationManager)
+        Input[Input Manager]
+        SelectSys[Selection System]
+        CmdSys[Command System]
+        NavSys[Movement System]
+        ComSys[Combat System]
+        ResSys[Resource System]
+        AISys[AI System (FSM)]
+        VisSys[Visibility System]
+    end
+
+    subgraph Entities & Components (Data Containers)
+        Unit[Unit Entity]
+        ResNode[Resource Node Entity]
+
+        Health[Health Component]
+        Movement[Movement Component]
+        Combat[Combat Component]
+        Selectable[Selectable Component]
+        Gatherer[Gatherer Component]
+        Visibility[Visibility Component]
+    end
+
+    SimulationManager -->|ticks sequentially| Systems
+    Systems -->|read/write data| Components
+    Systems -->|emit/listen| EventBus
+    Unit -->|contains| Components
+    ResNode -->|contains| Components
+    EventBus -->|triggers events| Systems
+```
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/CONTENT_PIPELINE.md
+LANGUAGE    : Markdown
+SIZE        : 1,116 bytes
+SHA256      : be7a7c1c6d19941abf29ec7201e4a277dab7c4c8a7ba0735f87f4df306e28616
+LINES       : 22
+----------------------------------------------------------------------------------------------------
+
+# RTS Content Pipeline & Modding Guide
+
+## Overview
+The engine uses a data-driven pipeline where all gameplay assets are defined as resources.
+
+## Directory Structure
+- `data/buildings/`: Building templates and stats.
+- `data/tech/`: Research items and upgrade paths.
+- `data/abilities/`: Combat abilities and effects.
+- `data/biomes/`: Terrain and resource distribution profiles.
+
+## GUID-Based Identification
+Every content resource inherits from `GameContent` and must have a unique `guid`. This ensures that references remain stable even if files are moved or renamed.
+
+## Validation
+The `ContentValidator` tool (`scripts/tools/content_validator.gd`) should be run after any data changes to check for:
+1.  **Duplicate GUIDs**: Ensures identity uniqueness.
+2.  **Broken References**: Detects missing assets or invalid prerequisite links.
+3.  **Circular dependencies**: Prevents infinite tech tree loops.
+
+## Modding Support
+By loading content dynamically from the `data/` folder, the engine is inherently mod-friendly. New content can be added by placing additional `.tres` files in the corresponding directories.
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/EXECUTION_FLOW.md
+LANGUAGE    : Markdown
+SIZE        : 1,550 bytes
+SHA256      : d878abb41b8525a76a1786bb85c41567ae21ad116a6857a290f7f870658cdade
+LINES       : 21
+----------------------------------------------------------------------------------------------------
+
+# Tick Execution Order
+
+The engine drives logic through the fixed `_physics_process` in `SimulationManager.gd`. The manager sequentially iterates over registered systems.
+
+## Sequence Flow
+
+1. **Godot Frame Start:** Native inputs populate internal engine queues.
+2. **`InputManager._unhandled_input`:** Native events trigger EventBus actions (e.g., `selection_box_finished`, `command_issued`).
+3. **Simulation Tick Start (`SimulationManager._physics_process`):**
+    *   **Tick Increment:** `current_tick` counter increments.
+    *   **System Tick Execution (in order of scene tree registration):**
+        1.  `InputManager`: Currently pass-through.
+        2.  `SelectionSystem`: Processes buffered selections.
+        3.  `CommandSystem`: Processes buffered commands, assigning data to Components.
+        4.  `MovementSystem`: Evaluates pathfinding throttles, adjusts velocities, manages avoidance.
+        5.  `CombatSystem`: Iterates over combatants, processes ranges, applies damage, triggers `unit_died`.
+        6.  `ResourceSystem`: Iterates over gatherers, extracts resources, updates totals.
+        7.  `AISystem`: Evaluates AI FSM, triggers new commands on EventBus if state changes.
+        8.  `VisibilitySystem`: Runs grid partitioning pass, evaluates FOV radiuses, emits visibility toggles.
+    *   **Victory Evaluation:** Evaluated on interval (e.g., every 60 ticks) across all registered `VictoryCondition` objects.
+4. **Native Rendering/Physics:** Godot applies `CharacterBody3D.move_and_slide()` transforms to the visual layer.
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/LOCKSTEP_GUIDE.md
+LANGUAGE    : Markdown
+SIZE        : 1,136 bytes
+SHA256      : 0f3b195af5ee8e9b52334f62e564c1e64f53fdbbf6c73e71588a642237904873
+LINES       : 15
+----------------------------------------------------------------------------------------------------
+
+# RTS Lockstep Architecture Guide
+
+## Overview
+This engine utilizes a strict deterministic lockstep architecture to ensure perfect synchronization across all clients in a multiplayer match.
+
+## Core Principles
+1.  **Fixed-Tick Simulation**: The simulation runs at a constant 30Hz (`TICK_RATE`). All gameplay logic occurs within `tick(delta_fixed)` methods.
+2.  **Command-Based Authority**: Units do not move themselves. The `CommandBuffer` collects inputs and distributes them to systems for execution on a specific future tick.
+3.  **Deterministic Math**: All calculations (movement, combat, collision) use snapped coordinates and fixed-order iterations to prevent floating-point drift across platforms.
+4.  **No Side-Effects**: Simulation logic must never depend on rendering state, frame rate, or platform-specific OS features.
+
+## Checksum Validation
+Every 30 ticks (1 second), the `SimulationManager` generates a SHA-256 checksum of the entire world state.
+- **Desync Detection**: If checksums differ between clients, a desync is declared.
+- **Provenance**: Checksums include entity positions, health, and current simulation tick.
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/PERFORMANCE_GUIDE.md
+LANGUAGE    : Markdown
+SIZE        : 1,179 bytes
+SHA256      : 1b0321aab44130b0be33e34f05df39cf1bd1a7d3a36b7b6571a6ffe004e9069e
+LINES       : 19
+----------------------------------------------------------------------------------------------------
+
+# RTS Performance & Scalability Guide
+
+## Overview
+This engine is designed to handle 1000+ units in real-time through aggressive optimization and parallelization.
+
+## Optimization Layers
+1.  **Job System**: Parallelizes expensive O(N) or O(N^2) tasks like visibility distance checks and spatial grid updates using Godot's `WorkerThreadPool`.
+2.  **Spatial Partitioning**: The `SpatialGrid` reduces neighbor lookups from O(N^2) to O(1) for local interactions.
+3.  **Flow Field Navigation**: Replaces per-unit A* pathfinding with a single vector field lookup per group, allowing hundreds of units to move with minimal CPU overhead.
+4.  **Throttled AI/Influence**: Strategic reasoning and influence maps update at a lower frequency (1Hz) compared to the core simulation (30Hz).
+
+## Scalability Targets
+- **100 Units**: <1ms tick duration.
+- **500 Units**: <5ms tick duration.
+- **1000 Units**: <15ms tick duration (30Hz overhead limit: 33ms).
+
+## Memory Management
+- **Pre-allocation**: Large arrays and buffers are pre-allocated during initialization to avoid GC spikes.
+- **PackedArrays**: Used for large data-heavy grids (influence maps, flow fields) to optimize memory density.
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/REPLAY_SYSTEM.md
+LANGUAGE    : Markdown
+SIZE        : 957 bytes
+SHA256      : 631f066a6208e7aa9666415daaf1e8c6b28d3076ddcbfe2b20b61d751594a49a
+LINES       : 19
+----------------------------------------------------------------------------------------------------
+
+# RTS Replay System Documentation
+
+## Overview
+Replays in this engine are stored as a sequence of deterministic commands anchored to a starting seed.
+
+## Structure
+A replay file contains:
+1.  **World Seed**: The integer used for procedural generation.
+2.  **Command Timeline**: A dictionary mapping `tick_number` to an array of commands.
+3.  **Metadata**: Map name, players, and match duration.
+
+## Recording Process
+1.  **Command Interception**: The `EventBus` captures all commands issued via the UI or AI.
+2.  **Serialization**: Commands are stored with their target tick to ensure they execute at the exact same moment during playback.
+
+## Playback Process
+1.  **Simulation Reset**: The engine reloads the map using the recorded seed.
+2.  **Injecting Commands**: The `ReplayManager` feeds recorded commands into the `CommandBuffer` as the simulation progresses.
+3.  **Validation**: Every tick is compared against recorded checksums to verify integrity.
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/ROADMAP.md
+LANGUAGE    : Markdown
+SIZE        : 1,318 bytes
+SHA256      : c9d5559598b3b88148b448f641cc54615be20ecabb10eccd1d7d82caf0dd551c
+LINES       : 71
+----------------------------------------------------------------------------------------------------
+
+# Game Development Roadmap
+
+## Phase 1 — Foundation
+
+- Godot project initialization
+- Core architecture setup
+- Scene organization
+- Input system
+- Camera controller
+- Linux build validation
+
+## Phase 2 — RTS Core Systems
+
+- Unit selection
+- Group assignment
+- Movement commands
+- Pathfinding
+- Combat targeting
+- Health and damage systems
+- Basic AI agents
+
+## Phase 3 — Exploration Layer
+
+- Procedural terrain sectors
+- Fog of war
+- Discoverable structures
+- Dynamic environmental hazards
+- Resource node generation
+
+## Phase 4 — Economy and Progression
+
+- Resource extraction
+- Energy systems
+- Technology trees
+- Base expansion
+- Unit production queues
+
+## Phase 5 — Faction Identity
+
+### Solaris Dominion
+- Drone swarms
+- Energy shields
+- Orbital precision strikes
+
+### Umbral Collective
+- Stealth expansion
+- Biomass evolution
+- Adaptive regeneration
+
+## Phase 6 — AI and Automation
+
+- Strategic AI behaviors
+- Tactical combat AI
+- Exploration heuristics
+- Reinforcement-learning experiments
+
+## Phase 7 — Multiplayer Preparation
+
+- Deterministic simulation review
+- State synchronization
+- Lockstep networking research
+
+## Phase 8 — Production and Release
+
+- Performance optimization
+- Steam Deck compatibility
+- Linux packaging
+- Save system
+- Settings menu
+- Audio pipeline
+- Marketing assets
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/SYSTEM_DEPENDENCIES.md
+LANGUAGE    : Markdown
+SIZE        : 1,939 bytes
+SHA256      : c15b541fe8a04cc51a81e92140641832ca227ebeaea3c70b5bda67b334b3428f
+LINES       : 48
+----------------------------------------------------------------------------------------------------
+
+# System Dependencies
+
+Strict decoupling is enforced through the Event Bus and Simulation Manager. No system holds direct references to other systems.
+
+## Event Flow & Dependencies
+
+1. **InputManager**
+   - **Emits:** `unit_selected`, `selection_cleared`, `selection_box_finished`, `command_issued`
+   - **Depends On:** Native Input system, raycasting.
+
+2. **SelectionSystem**
+   - **Listens:** `unit_selected`, `selection_cleared`, `selection_box_finished`, `unit_died`
+   - **Depends On:** `SelectableComponent` data.
+
+3. **CommandSystem**
+   - **Listens:** `command_issued`
+   - **Depends On:** Routes intended targets to `MovementComponent`, `CombatComponent`, and `GathererComponent`.
+
+4. **MovementSystem**
+   - **Ticks:** Processes throttled pathfinding and velocity integration.
+   - **Depends On:** `MovementComponent`, `NavigationAgent3D` properties.
+
+5. **CombatSystem**
+   - **Ticks:** Checks distances and cooldowns.
+   - **Emits:** `combat_started`, `unit_died`
+   - **Depends On:** `CombatComponent`, `HealthComponent`.
+   - **Fallback Routing:** Directly enqueues units into `MovementSystem.entities_to_move` if target is out of range. *(Tech Debt: Should route via EventBus in future).*
+
+6. **ResourceSystem**
+   - **Ticks:** Checks gather timers and distances.
+   - **Emits:** `resource_collected`
+   - **Depends On:** `GathererComponent`, resource nodes implementing `extract()`.
+
+7. **AISystem**
+   - **Ticks:** Evaluates FSM.
+   - **Emits:** `command_issued`
+   - **Depends On:** `CombatComponent` for state checks.
+
+8. **VisibilitySystem**
+   - **Ticks:** Manages spatial partitioning grid and FOV checks.
+   - **Emits:** `visibility_changed`
+   - **Depends On:** `VisibilityComponent`.
+
+## AutoLoad Dependencies
+
+- All logic systems heavily rely on **EventBus** for inter-system communication.
+- Entity destruction explicitly depends on **EntityManager**.
+- Any procedural behavior requires **DeterministicRandom**.
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/SYSTEMS.md
+LANGUAGE    : Markdown
+SIZE        : 909 bytes
+SHA256      : 04973e71813d5304cbd89c5a42e0740509aa747f5d35b63b8b70e0cd7755d25f
+LINES       : 25
+----------------------------------------------------------------------------------------------------
+
+# Core Systems Documentation
+
+## RTS Camera Controller (`RTSCamera`)
+Path: `scenes/camera/rts_camera.tscn`
+
+A fully decoupled, modular RTS Camera node designed for a deterministic game environment.
+
+### Features
+- Keyboard Panning (WASD default mapped to `camera_forward`, `camera_backward`, `camera_left`, `camera_right`)
+- Edge Panning via mouse with configurable margins and speed
+- Zooming via Mouse Wheel (mapped to `camera_zoom_in` and `camera_zoom_out`)
+- Built-in `Elevation` Node to safely change camera pitch/angles without breaking translational panning logic.
+
+### Future Work (TODOs)
+- Terrain Adaptation (Height adjustment based on ground raycasts)
+- Target Follow Logic (Track a specific unit or point of interest)
+
+### Input Actions
+Configure the following in your `project.godot`:
+- `camera_forward`
+- `camera_backward`
+- `camera_left`
+- `camera_right`
+- `camera_zoom_in`
+- `camera_zoom_out`
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/TECH_STACK.md
+LANGUAGE    : Markdown
+SIZE        : 505 bytes
+SHA256      : 14a01843634a60a56986548b9459c095c85ef24a0e35f34bc1c3c7459e46f1e0
+LINES       : 42
+----------------------------------------------------------------------------------------------------
+
+# Technology Stack
+
+## Engine
+
+- Godot 4.x
+
+## Programming Languages
+
+- GDScript
+- Python (AI services)
+- Optional Rust modules
+
+## Target Platforms
+
+- Linux (primary)
+- Steam Deck
+- Windows (future)
+
+## Version Control
+
+- Git
+- GitHub
+
+## AI Tooling
+
+- Local LLM support planned
+- Reinforcement-learning experimentation support
+
+## Audio
+
+- Open audio pipeline
+- Procedural ambient systems planned
+
+## Rendering
+
+- Vulkan
+- Forward+ renderer
+
+## CI/CD (Future)
+
+- GitHub Actions
+- Automated Linux builds
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/TECHNICAL_DEBT.md
+LANGUAGE    : Markdown
+SIZE        : 1,223 bytes
+SHA256      : e765ed2b15ef395a86d2e74d8d1dce1a765e9bd0db7d8d7f7d67500528784845
+LINES       : 18
+----------------------------------------------------------------------------------------------------
+
+# Technical Debt & Future Milestones (STABILIZED)
+
+## Resolved Debt (Milestone 1-18)
+
+1.  [x] **EventBus Fallback Routing**: All systems now use pure `CommandBuffer` and `EventBus` communication.
+2.  [x] **Faction Assumptions**: Replaced with a dynamic `FactionRegistry`.
+3.  [x] **Visibility Shading**: Implemented shader-based Fog of War with explored/unexplored states.
+4.  [x] **Collision Avoidance**: Implemented deterministic circle-collision resolution in `TransformIntegrator`.
+5.  [x] **Node Grouping Reliance**: Replaced legacy group queries with O(1) `ComponentRegistry` lookups.
+6.  [x] **Serialization Integration**: Every system and component now implements `save_state()` and `load_state()`.
+7.  [x] **Scalability Limits**: Implemented `JobSystem` and `FlowField` navigation, enabling stable 1000+ unit simulations.
+
+## New Future Milestones
+
+1.  **Production Content**: Populating `data/` with high-fidelity units, buildings, and tech.
+2.  **Network Performance**: Fine-tuning the `NetworkManager` for high-latency P2P environments.
+3.  **UI Refinement**: Building a production-grade HUD utilizing the `TacticalInfluenceSystem`.
+4.  **Audio Design**: Implementing a spatialized, data-driven audio pipeline.
+
+----------------------------------------------------------------------------------------------------
+FILE        : docs/USER_STORIES.md
+LANGUAGE    : Markdown
+SIZE        : 1,112 bytes
+SHA256      : a116cb83e223738f246043abd7bb62ffbcfc99b021407e05a0ef04fd31d1ab55
+LINES       : 56
+----------------------------------------------------------------------------------------------------
+
+# User Stories
+
+## Exploration
+
+### US-001
+As a player,
+I want to explore unknown sectors,
+so that I can discover strategic resources and hidden threats.
+
+### US-002
+As a player,
+I want fog of war mechanics,
+so that scouting and map control matter strategically.
+
+## RTS Combat
+
+### US-003
+As a player,
+I want to select and command multiple units,
+so that I can coordinate tactical operations efficiently.
+
+### US-004
+As a player,
+I want faction-specific combat abilities,
+so that each faction feels unique.
+
+## Economy
+
+### US-005
+As a player,
+I want to harvest resources,
+so that I can expand my infrastructure and military.
+
+### US-006
+As a player,
+I want technology progression,
+so that strategic decisions influence late-game power.
+
+## AI
+
+### US-007
+As a player,
+I want intelligent enemy behavior,
+so that battles feel dynamic and challenging.
+
+### US-008
+As a developer,
+I want modular AI systems,
+so that future reinforcement-learning integration is possible.
+
+## Linux Support
+
+### US-009
+As a Linux player,
+I want native Linux support,
+so that the game performs reliably without compatibility layers.
+
+----------------------------------------------------------------------------------------------------
+FILE        : export_presets.cfg
+LANGUAGE    : Config
+SIZE        : 1,603 bytes
+SHA256      : 505189e7fefb586da5dd4093aced47c3b152f3ddbcc87a8e383abbcbf0b39824
+LINES       : 0
+STATUS      : REDACTED (SENSITIVE)
+----------------------------------------------------------------------------------------------------
+
+[REDACTED]
+
+----------------------------------------------------------------------------------------------------
+FILE        : export_presets.cfg.example
+LANGUAGE    : Text
+SIZE        : 785 bytes
+SHA256      : d9328fbb7f249d6d5e3e15f27c373b9e28a748907385a160e10c34dca8dd981f
+LINES       : 34
+----------------------------------------------------------------------------------------------------
+
+[preset.0]
+
+name="Linux"
+platform="Linux"
+runnable=true
+advanced_options=false
+dedicated_server=false
+custom_features=""
+export_filter="all_resources"
+include_filter=""
+exclude_filter=""
+export_path="builds/linux/game.x86_64"
+patch_list=PackedStringArray()
+script_export_mode=1
+
+[preset.0.options]
+
+custom_template/debug=""
+custom_template/release=""
+debug/export_console_wrapper=1
+binary_format/embed_pck=false
+texture_format/bptc=true
+texture_format/s3tc=true
+texture_format/etc=false
+texture_format/etc2=false
+binary_format/architecture="x86_64"
+
+ssh_remote_deploy/enabled=false
+ssh_remote_deploy/host="localhost"
+ssh_remote_deploy/port="22"
+ssh_remote_deploy/extra_args_ssh=""
+ssh_remote_deploy/extra_args_scp=""
+ssh_remote_deploy/run_script=""
+ssh_remote_deploy/cleanup_script=""
+
+----------------------------------------------------------------------------------------------------
+FILE        : LICENSE
+LANGUAGE    : Text
+SIZE        : 1,068 bytes
+SHA256      : 5aca584af845d8aa656e2af11da14ddf5704824cb6347afcb7b3a6ac48c55f3a
+LINES       : 21
+----------------------------------------------------------------------------------------------------
+
+MIT License
+
+Copyright (c) 2026 planetazul3
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+----------------------------------------------------------------------------------------------------
+FILE        : project.godot
+LANGUAGE    : Godot Project
+SIZE        : 3,931 bytes
+SHA256      : 0835ca73044ec13fceacacd9b4b74fa438a89f4b0727fb06a7d1f301e9d5fd98
+LINES       : 99
+----------------------------------------------------------------------------------------------------
+
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Game"
+run/main_scene="res://scenes/test_map.tscn"
+config/features=PackedStringArray("4.4")
+
+[autoload]
+
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="canvas_items"
+
+[input]
+ui_cancel={
+"deadzone": 0.5,
+"events": []
+}
+
+camera_forward={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":87,"key_label":0,"unicode":119,"location":0,"echo":false,"script":null)
+]
+}
+camera_backward={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":83,"key_label":0,"unicode":115,"location":0,"echo":false,"script":null)
+]
+}
+camera_left={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":65,"key_label":0,"unicode":97,"location":0,"echo":false,"script":null)
+]
+}
+camera_right={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":68,"key_label":0,"unicode":100,"location":0,"echo":false,"script":null)
+]
+}
+camera_zoom_in={
+"deadzone": 0.5,
+"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":4,"canceled":false,"pressed":false,"double_click":false,"script":null)
+]
+}
+camera_zoom_out={
+"deadzone": 0.5,
+"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":5,"canceled":false,"pressed":false,"double_click":false,"script":null)
+]
+}
+unit_select={
+"deadzone": 0.5,
+"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":1,"canceled":false,"pressed":false,"double_click":false,"script":null)
+]
+}
+unit_command={
+"deadzone": 0.5,
+"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":2,"canceled":false,"pressed":false,"double_click":false,"script":null)
+]
+}
+box_select_start={
+"deadzone": 0.5,
+"events": []
+}
+box_select_end={
+"deadzone": 0.5,
+"events": []
+}
+deselect_all={
+"deadzone": 0.5,
+"events": []
+}
+select_all={
+"deadzone": 0.5,
+"events": []
+}
+pause_game={
+"deadzone": 0.5,
+"events": []
+}
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+ui_cancel={
+"deadzone": 0.5,
+"events": []
+}
+
+----------------------------------------------------------------------------------------------------
+FILE        : README.md
+LANGUAGE    : Markdown
+SIZE        : 1,271 bytes
+SHA256      : 80d13e67e2e6befedf30023a19d55e650016d3d05489ef7cce1d853810b3b536
+LINES       : 66
+----------------------------------------------------------------------------------------------------
+
+# Game
+
+Real-time strategy and exploration game for Linux PC built with Godot 4.
+
+## Concept
+
+A hybrid RTS/exploration experience featuring two initial factions:
+
+- Solaris Dominion
+- Umbral Collective
+
+Players expand territory, harvest energy, explore procedural regions, and command units in real time.
+
+## Planned Features
+
+- Real-time strategy combat
+- Fog of war
+- Procedural exploration sectors
+- Dynamic resource economy
+- AI-controlled factions
+- Single-player skirmish mode
+- Linux-first development
+- Modular architecture for future multiplayer support
+
+## Engine
+
+- Godot 4.4 (use `godot4.4` to execute)
+
+## Project Structure
+
+```text
+assets/
+  textures/
+  audio/sfx/
+  audio/music/
+  fonts/
+  shaders/
+scripts/
+scenes/
+data/
+```
+
+## Linux Export
+
+To export the game for Linux from the command line, run:
+```bash
+godot4.4 --headless --export-release "Linux/X11"
+```
+
+## Initial Factions
+
+### Solaris Dominion
+High-tech energy civilization focused on shields, drones, and precision warfare.
+
+### Umbral Collective
+Adaptive biomechanical faction specialized in stealth, regeneration, and map control.
+
+## Roadmap
+
+- Core RTS systems
+- Unit selection and commands
+- Resource harvesting
+- Procedural world sectors
+- Combat AI
+- Save system
+- Steam/Linux packaging
+
+----------------------------------------------------------------------------------------------------
+FILE        : scenes/attack_marker.tscn
+LANGUAGE    : Godot Scene
+SIZE        : 905 bytes
+SHA256      : 54ead63f1d1ff1926bac87886e4acd84ed129660172cc06b296ebb7b2a2c208e
+LINES       : 29
+----------------------------------------------------------------------------------------------------
+
+[gd_scene load_steps=4 format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_attack"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="TorusMesh" id="TorusMesh_attack"]
+material = SubResource("StandardMaterial3D_attack")
+inner_radius = 0.4
+outer_radius = 0.5
+
+[sub_resource type="GDScript" id="GDScript_marker"]
+script/source = "extends Node3D
+
+func _ready():
+	var mesh_node = $MeshInstance3D
+	var tween = create_tween()
+	tween.tween_property(self, \"scale\", Vector3(1.5, 0.1, 1.5), 0.3)
+	tween.parallel().tween_property(mesh_node, \"transparency\", 1.0, 0.3)
+	tween.tween_callback(queue_free)
+"
+
+[node name="AttackMarker" type="Node3D"]
+script = SubResource("GDScript_marker")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.1, 0, 0, 0, 1, 0, 0.05, 0)
+mesh = SubResource("TorusMesh_attack")
+
+----------------------------------------------------------------------------------------------------
+FILE        : scenes/bullet.tscn
+LANGUAGE    : Godot Scene
+SIZE        : 1,268 bytes
+SHA256      : 2f0d992220c4115ffba6488bcb17dd5f35391eedecb149b414532e8e08803da4
+LINES       : 45
+----------------------------------------------------------------------------------------------------
+
+[gd_scene load_steps=5 format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bullet"]
+shading_mode = 0
+albedo_color = Color(1, 1, 0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_bullet"]
+material = SubResource("StandardMaterial3D_bullet")
+radius = 0.1
+height = 0.2
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_bullet"]
+radius = 0.1
+
+[sub_resource type="GDScript" id="GDScript_bullet"]
+script/source = "extends Node3D
+
+var target: Node3D = null
+var speed: float = 20.0
+var damage: int = 10
+
+func _process(delta: float) -> void:
+	if not is_instance_valid(target):
+		queue_free()
+		return
+		
+	var dir = (target.global_position + Vector3(0, 0.9, 0) - global_position).normalized()
+	global_position += dir * speed * delta
+	
+	if global_position.distance_to(target.global_position + Vector3(0, 0.9, 0)) < 0.5:
+		if target.has_method(\"take_damage\"):
+			target.take_damage(damage)
+		queue_free()
+"
+
+[node name="Bullet" type="Node3D"]
+script = SubResource("GDScript_bullet")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_bullet")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("SphereShape3D_bullet")
+
+----------------------------------------------------------------------------------------------------
+FILE        : scenes/death_particles.tscn
+LANGUAGE    : Godot Scene
+SIZE        : 1,002 bytes
+SHA256      : 3fe329bf931873536a36881d274b4d7227ef527507448aac9da8036957522375
+LINES       : 35
+----------------------------------------------------------------------------------------------------
+
+[gd_scene load_steps=5 format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_spark"]
+shading_mode = 0
+albedo_color = Color(1, 0.5, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_spark"]
+material = SubResource("StandardMaterial3D_spark")
+size = Vector3(0.1, 0.1, 0.1)
+
+[sub_resource type="Curve" id="Curve_spark"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -1.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="GDScript" id="GDScript_death"]
+script/source = "extends CPUParticles3D
+
+func _ready():
+	emitting = true
+	await get_tree().create_timer(1.0).timeout
+	queue_free()
+"
+
+[node name="DeathParticles" type="CPUParticles3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+amount = 20
+explosiveness = 1.0
+mesh = SubResource("BoxMesh_spark")
+direction = Vector3(0, 1, 0)
+spread = 180.0
+gravity = Vector3(0, -5, 0)
+initial_velocity_min = 3.0
+initial_velocity_max = 5.0
+scale_amount_curve = SubResource("Curve_spark")
+script = SubResource("GDScript_death")
+
+----------------------------------------------------------------------------------------------------
+FILE        : scenes/game_ui.tscn
+LANGUAGE    : Godot Scene
+SIZE        : 2,560 bytes
+SHA256      : 549284fd1108082c90a2a4685c2b35c16c59dfec041693d3dc97d100565a7ab5
+LINES       : 108
+----------------------------------------------------------------------------------------------------
+
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/game_ui.gd" id="1_ui"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud"]
+bg_color = Color(0, 0, 0, 0.4)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="GameUI" type="CanvasLayer"]
+process_mode = 3
+script = ExtResource("1_ui")
+
+[node name="HUD" type="Panel" parent="."]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -100.0
+offset_top = 20.0
+offset_right = 100.0
+offset_bottom = 80.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud")
+
+[node name="PlayerCount" type="Label" parent="HUD"]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 20.0
+offset_top = -11.5
+offset_right = 80.0
+offset_bottom = 11.5
+grow_vertical = 2
+text = "Units: 4"
+
+[node name="EnemyCount" type="Label" parent="HUD"]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -90.0
+offset_top = -11.5
+offset_right = -20.0
+offset_bottom = 11.5
+grow_horizontal = 0
+grow_vertical = 2
+text = "Enemies: 4"
+horizontal_alignment = 2
+
+[node name="WinScreen" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="WinScreen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="Panel" parent="WinScreen"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -100.0
+offset_right = 150.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="WinScreen/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="WinLabel" type="Label" parent="WinScreen/Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "VICTORY"
+horizontal_alignment = 1
+
+[node name="Restart" type="Button" parent="WinScreen/Panel/VBoxContainer"]
+custom_minimum_size = Vector2(100, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "PLAY AGAIN"
+
+[connection signal="pressed" from="WinScreen/Panel/VBoxContainer/Restart" to="." method="_on_restart_pressed"]
+
+----------------------------------------------------------------------------------------------------
+FILE        : scenes/move_marker.tscn
+LANGUAGE    : Godot Scene
+SIZE        : 760 bytes
+SHA256      : e4f6f5c4b95596ad79e8d07b3d7f47fd4e771bb4c0159f9e68a993f4fb9312fe
+LINES       : 24
+----------------------------------------------------------------------------------------------------
+
+[gd_scene load_steps=4 format=3]
+
+[sub_resource type="GDScript" id="GDScript_marker"]
+script/source = "extends MeshInstance3D
+
+func _ready():
+	var tween = create_tween()
+	tween.tween_property(self, \"scale\", Vector3(0.1, 0.1, 0.1), 0.3).from(Vector3(1.5, 1.5, 1.5))
+	tween.tween_callback(queue_free)
+"
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_marker"]
+shading_mode = 0
+albedo_color = Color(0, 1, 0, 1)
+
+[sub_resource type="TorusMesh" id="TorusMesh_marker"]
+material = SubResource("StandardMaterial3D_marker")
+inner_radius = 0.4
+outer_radius = 0.5
+
+[node name="MoveMarker" type="MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+mesh = SubResource("TorusMesh_marker")
+script = SubResource("GDScript_marker")
+
+----------------------------------------------------------------------------------------------------
+FILE        : scenes/test_map.tscn
+LANGUAGE    : Godot Scene
+SIZE        : 3,578 bytes
+SHA256      : 1d6c12d748341698164a9b7c9a06d2cd002da25d67d7de52a8e669baa4510cda
+LINES       : 90
+----------------------------------------------------------------------------------------------------
+
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/unit.tscn" id="1_unit_scene"]
+[ext_resource type="Script" path="res://scripts/player_controller.gd" id="2_player"]
+[ext_resource type="Script" path="res://scripts/rts_camera.gd" id="3_camera"]
+[ext_resource type="PackedScene" path="res://scenes/game_ui.tscn" id="4_ui_scene"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+size = Vector3(100, 1, 100)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(100, 1, 100)
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_map"]
+vertices = PackedVector3Array(-50, 0.5, -50, -50, 0.5, 50, 50, 0.5, 50, 50, 0.5, -50)
+polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1)]
+
+[sub_resource type="Environment" id="Environment_map"]
+background_mode = 1
+background_color = Color(0.1, 0.1, 0.15, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.5, 0.5, 0.5, 1)
+
+[node name="TestMap" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_map")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 10, 0)
+
+[node name="GameUI" parent="." instance=ExtResource("4_ui_scene")]
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavigationMesh_map")
+
+[node name="Floor" type="StaticBody3D" parent="NavigationRegion3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Floor"]
+mesh = SubResource("BoxMesh_floor")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Floor"]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="PlayerController" type="Node3D" parent="."]
+script = ExtResource("2_player")
+
+[node name="Camera3D" type="Camera3D" parent="PlayerController"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 15, 10)
+script = ExtResource("3_camera")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="PlayerController"]
+
+[node name="SelectionBox" type="ColorRect" parent="PlayerController/CanvasLayer"]
+visible = false
+offset_right = 40.0
+offset_bottom = 40.0
+color = Color(0.3, 1, 0.3, 0.3)
+
+[node name="PlayerUnits" type="Node3D" parent="."]
+
+[node name="Unit1" parent="PlayerUnits" instance=ExtResource("1_unit_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.5, 0)
+
+[node name="Unit2" parent="PlayerUnits" instance=ExtResource("1_unit_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.5, 2)
+
+[node name="Unit3" parent="PlayerUnits" instance=ExtResource("1_unit_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.5, -2)
+
+[node name="Unit4" parent="PlayerUnits" instance=ExtResource("1_unit_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.5, 0)
+
+[node name="EnemyUnits" type="Node3D" parent="."]
+
+[node name="Enemy1" parent="EnemyUnits" instance=ExtResource("1_unit_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.5, 0)
+faction_id = 1
+
+[node name="Enemy2" parent="EnemyUnits" instance=ExtResource("1_unit_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.5, 2)
+faction_id = 1
+
+[node name="Enemy3" parent="EnemyUnits" instance=ExtResource("1_unit_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.5, -2)
+faction_id = 1
+
+[node name="Enemy4" parent="EnemyUnits" instance=ExtResource("1_unit_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0.5, 0)
+faction_id = 1
+
+----------------------------------------------------------------------------------------------------
+FILE        : scenes/unit.tscn
+LANGUAGE    : Godot Scene
+SIZE        : 1,884 bytes
+SHA256      : 8884861edd9e1842a6211d74167d7b59969c2955f4fd2587f67376372ed16835
+LINES       : 63
+----------------------------------------------------------------------------------------------------
+
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/unit.gd" id="1_unit"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_unit"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_unit"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ring"]
+shading_mode = 0
+albedo_color = Color(0, 1, 0, 1)
+
+[sub_resource type="TorusMesh" id="TorusMesh_ring"]
+material = SubResource("StandardMaterial3D_ring")
+inner_radius = 0.8
+outer_radius = 1.0
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_hp"]
+viewport_path = NodePath("SubViewport")
+
+[node name="Unit" type="CharacterBody3D"]
+script = ExtResource("1_unit")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_unit")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_unit")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.5
+target_desired_distance = 0.5
+path_max_distance = 3.0
+avoidance_enabled = true
+
+[node name="SelectionRing" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+mesh = SubResource("TorusMesh_ring")
+
+[node name="Sprite3D" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+billboard = 1
+texture = SubResource("ViewportTexture_hp")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+disable_3d = true
+transparent_bg = true
+size = Vector2i(100, 20)
+
+[node name="ProgressBar" type="ProgressBar" parent="SubViewport"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+value = 100.0
+show_percentage = false
+
+----------------------------------------------------------------------------------------------------
+FILE        : scripts/game_ui.gd
+LANGUAGE    : GDScript
+SIZE        : 938 bytes
+SHA256      : 32f7f9cc1caf55c23c3260c93796ae0e724ff2fa0cf655480ebdbd4d716f506a
+LINES       : 33
+----------------------------------------------------------------------------------------------------
+
+extends CanvasLayer
+
+@onready var player_count_label: Label = $HUD/PlayerCount
+@onready var enemy_count_label: Label = $HUD/EnemyCount
+@onready var win_screen: Control = $WinScreen
+@onready var win_label: Label = $WinScreen/Panel/VBoxContainer/WinLabel
+
+func _process(_delta: float) -> void:
+	var units = get_tree().get_nodes_in_group("units")
+	var p_count = 0
+	var e_count = 0
+	for u in units:
+		if u.faction_id == 0: p_count += 1
+		else: e_count += 1
+		
+	player_count_label.text = "Units: " + str(p_count)
+	enemy_count_label.text = "Enemies: " + str(e_count)
+	
+	if p_count == 0:
+		_show_win_screen("DEFEAT")
+	elif e_count == 0:
+		_show_win_screen("VICTORY")
+
+func _show_win_screen(msg: String) -> void:
+	if win_screen.visible: return
+	print("GAME ENDED: ", msg)
+	win_label.text = msg
+	win_screen.visible = true
+	get_tree().paused = true
+
+func _on_restart_pressed() -> void:
+	get_tree().paused = false
+	get_tree().reload_current_scene()
+
+----------------------------------------------------------------------------------------------------
+FILE        : scripts/player_controller.gd
+LANGUAGE    : GDScript
+SIZE        : 3,581 bytes
+SHA256      : 569203a018c756dc78b60f6447b67c565d5795cdf9afe18db8fefc3b4de03c28
+LINES       : 110
+----------------------------------------------------------------------------------------------------
+
+extends Node3D
+
+var selected_units: Array[Node] = []
+var is_dragging: bool = false
+var drag_start: Vector2
+var drag_end: Vector2
+
+@onready var selection_box: ColorRect = $CanvasLayer/SelectionBox
+@onready var camera: Camera3D = $Camera3D
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				is_dragging = true
+				drag_start = event.position
+				selection_box.visible = true
+				selection_box.size = Vector2.ZERO
+			else:
+				is_dragging = false
+				selection_box.visible = false
+				_perform_selection()
+				
+		if event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			_issue_move_command()
+
+func _process(_delta: float) -> void:
+	if is_dragging:
+		drag_end = get_viewport().get_mouse_position()
+		selection_box.position = Vector2(min(drag_start.x, drag_end.x), min(drag_start.y, drag_end.y))
+		selection_box.size = (drag_start - drag_end).abs()
+
+func _perform_selection() -> void:
+	# If drag area is tiny, it's a single click
+	var rect = Rect2(selection_box.position, selection_box.size)
+	var single_click = rect.size.length() < 5.0
+	
+	if not Input.is_key_pressed(KEY_SHIFT):
+		for unit in selected_units:
+			if is_instance_valid(unit):
+				unit.selected = false
+		selected_units.clear()
+	
+	if single_click:
+		_select_at_position(drag_start)
+	else:
+		_select_in_rect(rect)
+
+func _select_at_position(screen_pos: Vector2) -> void:
+	var from = camera.project_ray_origin(screen_pos)
+	var to = from + camera.project_ray_normal(screen_pos) * 1000.0
+	var space_state = get_world_3d().direct_space_state
+	var query = PhysicsRayQueryParameters3D.create(from, to)
+	var result = space_state.intersect_ray(query)
+	
+	if result and result.collider is CharacterBody3D:
+		var unit = result.collider
+		if unit.is_in_group("units") and unit.faction_id == 0:
+			unit.selected = true
+			selected_units.append(unit)
+
+func _select_in_rect(rect: Rect2) -> void:
+	var units = get_tree().get_nodes_in_group("units")
+	for unit in units:
+		if unit.faction_id == 0:
+			var screen_pos = camera.unproject_position(unit.global_position)
+			if rect.has_point(screen_pos):
+				unit.selected = true
+				if unit not in selected_units:
+					selected_units.append(unit)
+
+func _issue_move_command() -> void:
+	var mouse_pos = get_viewport().get_mouse_position()
+	var from = camera.project_ray_origin(mouse_pos)
+	var to = from + camera.project_ray_normal(mouse_pos) * 1000.0
+	
+	var space_state = get_world_3d().direct_space_state
+	var query = PhysicsRayQueryParameters3D.create(from, to)
+	var result = space_state.intersect_ray(query)
+	
+	if result:
+		var target_obj = result.collider
+		
+		# Check if we clicked an enemy unit
+		if target_obj.is_in_group("units") and target_obj.faction_id != 0:
+			_spawn_attack_marker(target_obj.global_position)
+			for unit in selected_units:
+				if is_instance_valid(unit):
+					unit.attack(target_obj)
+		else:
+			# Just move to position
+			var target_pos = result.position
+			_spawn_move_marker(target_pos)
+			for unit in selected_units:
+				if is_instance_valid(unit):
+					unit.move_to(target_pos)
+
+func _spawn_move_marker(pos: Vector3) -> void:
+	var marker_scene = load("res://scenes/move_marker.tscn")
+	if marker_scene:
+		var marker = marker_scene.instantiate()
+		get_tree().root.add_child(marker)
+		marker.global_position = pos
+
+func _spawn_attack_marker(pos: Vector3) -> void:
+	var marker_scene = load("res://scenes/attack_marker.tscn")
+	if marker_scene:
+		var marker = marker_scene.instantiate()
+		get_tree().root.add_child(marker)
+		marker.global_position = pos
+
+----------------------------------------------------------------------------------------------------
+FILE        : scripts/rts_camera.gd
+LANGUAGE    : GDScript
+SIZE        : 1,362 bytes
+SHA256      : 9a6c7a23ee5d9a387cb2fc2ee5658c0b89b903ab6f87988903874d25c1d927ca
+LINES       : 35
+----------------------------------------------------------------------------------------------------
+
+extends Camera3D
+
+@export var move_speed: float = 20.0
+@export var zoom_speed: float = 2.0
+@export var rotate_speed: float = 1.0
+
+var target_zoom: float = 15.0
+var min_zoom: float = 5.0
+var max_zoom: float = 40.0
+
+func _process(delta: float) -> void:
+	# WASD Movement
+	var input_dir = Vector2.ZERO
+	if Input.is_action_pressed("camera_forward"): input_dir.y -= 1
+	if Input.is_action_pressed("camera_backward"): input_dir.y += 1
+	if Input.is_action_pressed("camera_left"): input_dir.x -= 1
+	if Input.is_action_pressed("camera_right"): input_dir.x += 1
+	
+	var move_vec = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	move_vec.y = 0 # Keep camera level
+	get_parent().global_position += move_vec * move_speed * delta
+	
+	# Zoom (handled via FOV or height, let's use height)
+	if Input.is_action_just_pressed("camera_zoom_in"):
+		target_zoom = clamp(target_zoom - zoom_speed, min_zoom, max_zoom)
+	if Input.is_action_just_pressed("camera_zoom_out"):
+		target_zoom = clamp(target_zoom + zoom_speed, min_zoom, max_zoom)
+		
+	# Middle Mouse Rotation
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
+		var mouse_delta = Input.get_last_mouse_velocity() * delta * 0.1
+		get_parent().rotate_y(-deg_to_rad(mouse_delta.x * rotate_speed))
+		
+	position.y = lerp(position.y, target_zoom, delta * 5.0)
+	look_at(get_parent().global_position, Vector3.UP)
+
+----------------------------------------------------------------------------------------------------
+FILE        : scripts/unit.gd
+LANGUAGE    : GDScript
+SIZE        : 6,059 bytes
+SHA256      : d876b5917366a4ba3764e906159babb71b28182c73819e45573e7297d38308d7
+LINES       : 201
+----------------------------------------------------------------------------------------------------
+
+extends CharacterBody3D
+
+@export var hp: int = 100
+@export var speed: float = 5.0
+@export var faction_id: int = 0 # 0 = player, 1 = enemy
+
+var selected: bool = false
+var target_position: Vector3
+var target_unit: Node3D = null
+
+@onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
+@onready var selection_ring: MeshInstance3D = $SelectionRing
+@onready var hp_bar: ProgressBar = $SubViewport/ProgressBar
+@onready var mesh: MeshInstance3D = $MeshInstance3D
+
+enum State { IDLE, MOVE, ATTACK }
+var current_state: State = State.IDLE
+
+@export var attack_range: float = 8.0 # Ranged combat
+@export var attack_damage: int = 10
+@export var attack_cooldown: float = 1.0
+var attack_timer: float = 0.0
+
+var _original_material: StandardMaterial3D
+
+func _ready() -> void:
+	target_position = global_position
+	selection_ring.visible = false
+	add_to_group("units")
+	
+	# Set faction color
+	_original_material = StandardMaterial3D.new()
+	_original_material.albedo_color = Color.BLUE if faction_id == 0 else Color.RED
+	mesh.material_override = _original_material
+	
+	if faction_id != 0:
+		var ring_mat = StandardMaterial3D.new()
+		ring_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+		ring_mat.albedo_color = Color.RED
+		ring_mat.emission_enabled = true
+		ring_mat.emission = Color.RED
+		ring_mat.emission_energy_multiplier = 2.0
+		selection_ring.material_override = ring_mat
+	else:
+		var ring_mat = StandardMaterial3D.new()
+		ring_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+		ring_mat.albedo_color = Color.GREEN
+		ring_mat.emission_enabled = true
+		ring_mat.emission = Color.GREEN
+		ring_mat.emission_energy_multiplier = 2.0
+		selection_ring.material_override = ring_mat
+
+func _physics_process(delta: float) -> void:
+	if hp <= 0:
+		return
+
+	selection_ring.visible = selected
+	_update_hp_bar()
+	
+	match current_state:
+		State.IDLE:
+			_process_idle(delta)
+		State.MOVE:
+			_process_move(delta)
+		State.ATTACK:
+			_process_attack(delta)
+
+func _update_hp_bar() -> void:
+	hp_bar.value = hp
+	var color = Color.GREEN
+	if hp < 40: color = Color.RED
+	elif hp < 75: color = Color.YELLOW
+	
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = color
+	hp_bar.add_theme_stylebox_override("fill", sb)
+
+func move_to(pos: Vector3) -> void:
+	var offset = Vector3(randf_range(-1.0, 1.0), 0, randf_range(-1.0, 1.0))
+	target_position = pos + offset
+	target_unit = null
+	current_state = State.MOVE
+	nav_agent.set_target_position(target_position)
+
+func attack(target: Node3D) -> void:
+	target_unit = target
+	current_state = State.ATTACK
+
+func take_damage(amount: int) -> void:
+	hp -= amount
+	_flash_damage()
+	if hp <= 0:
+		die()
+
+func _flash_damage() -> void:
+	var flash_mat = StandardMaterial3D.new()
+	flash_mat.albedo_color = Color.WHITE
+	flash_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+	mesh.material_override = flash_mat
+	get_tree().create_timer(0.1).timeout.connect(func(): mesh.material_override = _original_material)
+	_play_sound("res://assets/sounds/hit.wav")
+
+func die() -> void:
+	var parts_scene = load("res://scenes/death_particles.tscn")
+	if parts_scene:
+		var parts = parts_scene.instantiate()
+		get_tree().root.add_child(parts)
+		parts.global_position = global_position
+	_play_sound("res://assets/sounds/death.wav")
+	queue_free()
+
+func _play_sound(path: String) -> void:
+	if not ResourceLoader.exists(path):
+		return
+		
+	var sfx = AudioStreamPlayer3D.new()
+	var stream = load(path)
+	if stream:
+		sfx.stream = stream
+		get_tree().root.add_child(sfx)
+		sfx.global_position = global_position
+		sfx.play()
+		sfx.finished.connect(sfx.queue_free)
+
+func _process_idle(_delta: float) -> void:
+	var units = get_tree().get_nodes_in_group("units")
+	var nearest_enemy = null
+	var min_dist = 30.0 # Increased from 15.0
+	
+	for unit in units:
+		if unit.faction_id != faction_id:
+			var d = global_position.distance_to(unit.global_position)
+			if d < min_dist:
+				min_dist = d
+				nearest_enemy = unit
+	
+	if nearest_enemy:
+		print("Unit ", name, " (Faction ", faction_id, ") spotted enemy ", nearest_enemy.name)
+		attack(nearest_enemy)
+
+func _process_move(delta: float) -> void:
+	if nav_agent.is_navigation_finished():
+		current_state = State.IDLE
+		mesh.scale = mesh.scale.lerp(Vector3.ONE, delta * 10.0) # Reset scale
+		return
+
+	var next_path_pos: Vector3 = nav_agent.get_next_path_position()
+	var new_velocity: Vector3 = (next_path_pos - global_position).normalized() * speed
+	
+	var push = _calculate_separation()
+	new_velocity += push * 4.0
+	
+	velocity = velocity.lerp(new_velocity, delta * 8.0)
+	move_and_slide()
+	
+	# Procedural "Running" animation (Squish/Stretch)
+	var walk_cycle = sin(Time.get_ticks_msec() * 0.015) * 0.1
+	mesh.scale.y = 1.0 + walk_cycle
+	mesh.scale.x = 1.0 - walk_cycle
+	mesh.scale.z = 1.0 - walk_cycle
+	
+	if velocity.length() > 0.5:
+		var look_target = global_position + velocity
+		look_at(Vector3(look_target.x, global_position.y, look_target.z), Vector3.UP)
+
+func _process_attack(delta: float) -> void:
+	if not is_instance_valid(target_unit) or target_unit.hp <= 0:
+		current_state = State.IDLE
+		return
+		
+	var dist = global_position.distance_to(target_unit.global_position)
+	if dist > attack_range:
+		nav_agent.set_target_position(target_unit.global_position)
+		_process_move(delta)
+	else:
+		velocity = velocity.lerp(Vector3.ZERO, delta * 10.0)
+		move_and_slide()
+		
+		attack_timer -= delta
+		if attack_timer <= 0:
+			_fire_projectile()
+			attack_timer = attack_cooldown
+
+func _fire_projectile() -> void:
+	var bullet_scene = load("res://scenes/bullet.tscn")
+	if bullet_scene:
+		var bullet = bullet_scene.instantiate()
+		get_tree().root.add_child(bullet)
+		bullet.global_position = global_position + Vector3(0, 0.9, 0)
+		bullet.target = target_unit
+		bullet.damage = attack_damage
+
+func _calculate_separation() -> Vector3:
+	var push = Vector3.ZERO
+	var units = get_tree().get_nodes_in_group("units")
+	for other in units:
+		if other == self: continue
+		var dist = global_position.distance_to(other.global_position)
+		if dist < 2.0:
+			push += (global_position - other.global_position).normalized() * (2.0 - dist)
+	return push
+
+====================================================================================================
+STATISTICS
+====================================================================================================
+
+Files Processed     : 42
+Files Included      : 41
+Sensitive Files     : 1
+Failed Files        : 0
+Total Lines         : 1,882
+
+Language Distribution:
+
+  Markdown                 23
+  Godot Scene               7
+  Text                      4
+  GDScript                  4
+  JSON                      1
+  YAML                      1
+  Config                    1
+  Godot Project             1
+

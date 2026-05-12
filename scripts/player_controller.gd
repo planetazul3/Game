@@ -90,10 +90,13 @@ func _issue_move_command() -> void:
 		else:
 			# Just move to position
 			var target_pos = result.position
-			_spawn_move_marker(target_pos)
+			
+			var is_attack_move = Input.is_key_pressed(KEY_A)
+			_spawn_move_marker(target_pos if not is_attack_move else target_pos) # Could use different color
+			
 			for unit in selected_units:
 				if is_instance_valid(unit):
-					unit.move_to(target_pos)
+					unit.move_to(target_pos, is_attack_move)
 
 func _spawn_move_marker(pos: Vector3) -> void:
 	var marker_scene = load("res://scenes/move_marker.tscn")
