@@ -87,3 +87,9 @@ func deserialize_commands(buffer: PackedByteArray) -> void:
 
 func clear() -> void:
 	_pending_commands.clear()
+
+func enqueue_serialized_command(tick: int, data: Dictionary) -> void:
+	# Ensure the tick in data matches the target tick
+	data["t"] = tick
+	var cmd = Command.from_dict(data)
+	enqueue_command(cmd)

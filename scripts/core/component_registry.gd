@@ -48,3 +48,8 @@ func get_entity_components(entity_id: int) -> Dictionary:
 
 func get_owner_id(component: RefCounted) -> int:
 	return _component_owners.get(component, -1)
+
+func clear_all() -> void:
+	_components_by_type.clear()
+	_entity_components.clear()
+	_component_owners.clear()

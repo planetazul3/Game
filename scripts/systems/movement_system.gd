@@ -116,3 +116,22 @@ func _on_combat_interrupt_movement(entity_id: int, new_target_position: Vector3)
 			if entity not in entities_to_move:
 				entities_to_move.append(entity)
 
+func save_state() -> Dictionary:
+	var entity_ids = []
+	for entity in entities_to_move:
+		if is_instance_valid(entity):
+			entity_ids.append(entity.get_meta("entity_id"))
+	
+	return {
+		"entities_to_move": entity_ids,
+		"path_request_queue": path_request_queue.duplicate()
+	}
+
+func load_state(state: Dictionary) -> void:
+	entities_to_move.clear()
+	for id in state.entities_to_move:
+		var entity = EntityManager.get_entity(id)
+		if entity: entities_to_move.append(entity)
+	
+	path_request_queue = Array(state.path_request_queue)
+

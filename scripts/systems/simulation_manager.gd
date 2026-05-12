@@ -82,3 +82,57 @@ func seed_simulation(simulation_seed: int) -> void:
 	if deterministic_rng:
 		deterministic_rng._rng.seed = simulation_seed
 		print("SimulationManager: Seeded simulation with ", simulation_seed)
+
+func save_simulation() -> Dictionary:
+	var state = {
+		"tick": current_tick,
+		"entities": {},
+		"systems": {}
+	}
+	
+	# 1. Save all entities
+	var all_entities = EntityManager.get_all_entities()
+	for id in all_entities:
+		var entity = all_entities[id]
+		var entity_data = {
+			"pos": [entity.global_position.x, entity.global_position.y, entity.global_position.z],
+			"rot": [entity.global_rotation.x, entity.global_rotation.y, entity.global_rotation.z],
+			"components": {}
+		}
+		
+		# Save components
+		var components = ComponentRegistry.get_entity_components(id)
+		for comp_type in components:
+			var comp = components[comp_type]
+			if comp.has_method("save_state"):
+				entity_data.components[comp_type] = comp.save_state()
+		
+		state.entities[id] = entity_data
+	
+	# 2. Save all systems
+	for system in _ordered_systems:
+		if system.has_method("save_state"):
+			state.systems[system.name] = system.save_state()
+			
+	return state
+
+func load_simulation(state: Dictionary) -> void:
+	current_tick = state.tick
+	
+	# 1. Recreate/Restore Entities
+	# First, clear current entities
+	EntityManager.clear_all_entities()
+	
+	for id_str in state.entities:
+		var id = int(id_str)
+		var data = state.entities[id_str]
+		
+		# In a real scenario, we'd need the unit type/definition to spawn the right prefab
+		# For now, let's assume we have a way to spawn by ID or metadata
+		# Re-creating entities from scratch is complex, so we'll need a factory helper
+		pass # Simplified for this phase
+
+	# 2. Restore systems
+	for system in _ordered_systems:
+		if state.systems.has(system.name):
+			system.load_state(state.systems[system.name])

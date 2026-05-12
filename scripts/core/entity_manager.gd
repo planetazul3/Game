@@ -59,3 +59,15 @@ func destroy_entity(entity: Node) -> void:
 func get_entity(id: int) -> Node:
 	return _entities.get(id, null)
 
+func get_all_entities() -> Dictionary:
+	return _entities
+
+func clear_all_entities() -> void:
+	for id in _entities:
+		var entity = _entities[id]
+		if is_instance_valid(entity):
+			entity.queue_free()
+	_entities.clear()
+	ComponentRegistry.clear_all()
+	_next_entity_id = 1
+
