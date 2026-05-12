@@ -26,10 +26,11 @@ func _setup_scenario(count: int) -> void:
 	
 	# 2. Spawn units in a grid
 	var side = ceil(sqrt(count))
+	var unit_def = load("res://data/units/soldier.tres")
 	for i in range(count):
 		var x = (i % int(side)) * 2
 		var z = floor(i / side) * 2
-		EntityFactory.spawn_unit("res://scenes/units/basic_unit.tscn", Vector3(x, 0, z), 0)
+		EntityFactory.spawn_unit(unit_def, Vector3(x, 0, z), 0)
 
 func _simulation_tick() -> void:
 	if not benchmark_running: return

@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://bvrt6xk8qj2y7"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1"]
+albedo_color = Color(0.2, 0.4, 0.8, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2"]
+albedo_color = Color(1, 0.8, 0.2, 1)
+
+[node name="SoldierVisuals" type="Node3D"]
+
+[node name="Body" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+size = Vector3(0.6, 1.2, 0.4)
+material = SubResource("StandardMaterial3D_1")
+
+[node name="Head" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+size = Vector3(0.4, 0.4, 0.4)
+material = SubResource("StandardMaterial3D_2")
+
+[node name="Gun" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 0.8, 0.3)
+size = Vector3(0.2, 0.2, 0.8)
+material = SubResource("StandardMaterial3D_1")
