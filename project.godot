@@ -28,6 +28,7 @@ SpatialGrid="*res://scripts/spatial/spatial_hash_grid.gd"
 DeterministicRandom="*res://scripts/core/deterministic_random.gd"
 FactionRegistry="*res://scripts/core/faction_registry.gd"
 TransformIntegrator="*res://scripts/simulation/transform_integrator.gd"
+JobSystem="*res://scripts/core/job_system.gd"
 
 [display]
 
