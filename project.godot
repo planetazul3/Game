@@ -16,6 +16,10 @@ config/features=PackedStringArray("4.4")
 
 [autoload]
 
+SceneManager="*res://scripts/core/scene_manager.gd"
+AudioManager="*res://scripts/core/audio_manager.gd"
+SaveManager="*res://scripts/core/save_manager.gd"
+GameState="*res://scripts/core/game_state.gd"
 EventBus="*res://scripts/core/event_bus.gd"
 EntityManager="*res://scripts/core/entity_manager.gd"
 DeterministicRandom="*res://scripts/core/deterministic_random.gd"
