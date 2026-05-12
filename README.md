@@ -24,15 +24,27 @@ Players expand territory, harvest energy, explore procedural regions, and comman
 
 ## Engine
 
-- Godot 4.x
+- Godot 4.4 (use `godot4.4` to execute)
 
 ## Project Structure
 
 ```text
 assets/
+  textures/
+  audio/sfx/
+  audio/music/
+  fonts/
+  shaders/
 scripts/
 scenes/
 data/
+```
+
+## Linux Export
+
+To export the game for Linux from the command line, run:
+```bash
+godot4.4 --headless --export-release "Linux/X11"
 ```
 
 ## Initial Factions
