@@ -28,7 +28,12 @@ func _recalculate_visibility() -> void:
 		if vis_comp.faction_id == player_faction_id:
 			player_vision_sources.append(entity)
 
-	# 2. Update visibility for all units
+	# 2. Update Fog of War Rendering
+	var fow_manager = get_tree().root.get_node_or_null("Main/Systems/FogOfWarManager")
+	if fow_manager:
+		fow_manager.update_vision(player_vision_sources)
+
+	# 3. Update visibility for all units
 	for entity in entities:
 		var vis_comp = entity.get("visibility_component") as VisibilityComponent
 		if not vis_comp or vis_comp.faction_id == player_faction_id: continue
