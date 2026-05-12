@@ -60,6 +60,9 @@ script = ExtResource("10_mov")
 [node name="VisibilitySystem" type="Node" parent="Systems"]
 script = ExtResource("11_vis")
 
+[node name="SelectionSystem" type="Node" parent="Systems"]
+script = ExtResource("4_sel")
+
 [node name="FormationSystem" type="Node" parent="Systems"]
 script = ExtResource("12_for")
 
