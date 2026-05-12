@@ -44,8 +44,14 @@ func _input(event: InputEvent) -> void:
 				if intersection != null:
 					world_position = intersection
 
-			# Emitir la orden cruda de movimiento
-			EventBus.input_command_issued.emit("move", null, world_position)
+			# Enqueue command into SimulationManager's buffer
+			var sim_manager = get_tree().root.find_child("SimulationManager", true, false)
+			if sim_manager and sim_manager is SimulationManager:
+				# We issue the command for the NEXT tick to ensure it's processed after the current one
+				var target_tick = sim_manager.current_tick + 1
+				var issuer_id = 0 # Default player ID
+				var cmd = CommandBuffer.Command.new(target_tick, issuer_id, 0, "move", world_position)
+				sim_manager.command_buffer.enqueue_command(cmd)
 
 
 	if event is InputEventMouseMotion:
