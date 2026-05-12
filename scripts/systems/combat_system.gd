@@ -24,7 +24,7 @@ func tick(delta: float) -> void:
 					combat_comp.attack_cooldown = 1.0 / combat_comp.attack_speed
 			else:
 				# Rule 4: System communication via EventBus ONLY
-				EventBus.combat_interrupt_movement.emit(entity.get_instance_id(), target.global_position)
+				EventBus.emit_command([entity], "move", target.global_position)
 
 		else:
 			combat_comp.target = null

@@ -9,7 +9,6 @@ var waypoint_tolerance: float = 0.2
 
 func _ready() -> void:
 	EventBus.safe_connect("command_issued", _on_command_issued)
-	EventBus.combat_interrupt_movement.connect(_on_combat_interrupt_movement)
 
 func tick(delta: float) -> void:
 	# 1. Process Path Requests (Throttled)
@@ -103,18 +102,8 @@ func _on_command_issued(units: Array[Node], command_type: String, target: Varian
 				if unit not in entities_to_move:
 					entities_to_move.append(unit)
 
-func _on_combat_interrupt_movement(entity_id: int, new_target_position: Vector3) -> void:
-	var entity = EntityManager.get_entity(entity_id)
-	if is_instance_valid(entity):
-		var move_comp = entity.get("movement_component") as MovementComponent
-		if move_comp:
-			move_comp.target_position = new_target_position
-			move_comp.has_target = true
-			move_comp.is_path_ready = false
-			if entity_id not in path_request_queue:
-				path_request_queue.append(entity_id)
-			if entity not in entities_to_move:
-				entities_to_move.append(entity)
+				if unit not in entities_to_move:
+					entities_to_move.append(unit)
 
 func save_state() -> Dictionary:
 	var entity_ids = []

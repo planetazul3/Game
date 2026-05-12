@@ -1,7 +1,6 @@
 extends Node
 class_name VisibilitySystem
 
-var player_faction_id: int = 0
 var update_timer: float = 0.0
 var update_interval: float = 0.5 # Throttle recalculations
 
@@ -25,7 +24,7 @@ func _recalculate_visibility() -> void:
 		var vis_comp = entity.get("visibility_component") as VisibilityComponent
 		if not vis_comp: continue
 		
-		if vis_comp.faction_id == player_faction_id:
+		if vis_comp.faction_id == FactionRegistry.get_player_faction_id():
 			player_vision_sources.append(entity)
 
 	# 2. Update Fog of War Rendering
@@ -36,7 +35,7 @@ func _recalculate_visibility() -> void:
 	# 3. Update visibility for all units
 	for entity in entities:
 		var vis_comp = entity.get("visibility_component") as VisibilityComponent
-		if not vis_comp or vis_comp.faction_id == player_faction_id: continue
+		if not vis_comp or vis_comp.faction_id == FactionRegistry.get_player_faction_id(): continue
 		
 		var currently_visible = false
 		

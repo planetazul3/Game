@@ -26,6 +26,7 @@ ComponentRegistry="*res://scripts/core/component_registry.gd"
 EntityFactory="*res://scripts/factory/entity_factory.gd"
 SpatialGrid="*res://scripts/spatial/spatial_hash_grid.gd"
 DeterministicRandom="*res://scripts/core/deterministic_random.gd"
+FactionRegistry="*res://scripts/core/faction_registry.gd"
 
 [display]
 
