@@ -29,6 +29,7 @@ DeterministicRandom="*res://scripts/core/deterministic_random.gd"
 FactionRegistry="*res://scripts/core/faction_registry.gd"
 TransformIntegrator="*res://scripts/simulation/transform_integrator.gd"
 JobSystem="*res://scripts/core/job_system.gd"
+EffectProcessor="*res://scripts/abilities/effect_processor.gd"
 
 [display]
 

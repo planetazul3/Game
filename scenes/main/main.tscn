@@ -16,6 +16,7 @@
 [ext_resource type="Script" path="res://scripts/main_level.gd" id="14_main"]
 [ext_resource type="Script" path="res://scripts/navigation/flow_field_manager.gd" id="15_ffm"]
 [ext_resource type="Script" path="res://scripts/ai/influence/tactical_influence_system.gd" id="16_tis"]
+[ext_resource type="Script" path="res://scripts/abilities/ability_system.gd" id="17_abs"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_grnd"]
 size = Vector2(100, 100)
@@ -72,6 +73,9 @@ script = ExtResource("16_tis")
 map_width = 100
 map_height = 100
 cell_size = 2.0
+
+[node name="AbilitySystem" type="Node" parent="Systems"]
+script = ExtResource("17_abs")
 
 [node name="FogOfWarManager" type="Node" parent="Systems"]
 script = ExtResource("13_fow")
