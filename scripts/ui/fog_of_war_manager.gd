@@ -47,6 +47,10 @@ func _ready() -> void:
 
 	var fog_material = ShaderMaterial.new()
 	fog_material.shader = load("res://shaders/fog_of_war.gdshader")
+	var noise_tex = load("res://assets/textures/fog_noise.png")
+	if noise_tex:
+		fog_material.set_shader_parameter("noise_texture", noise_tex)
+	
 	fog_material.set_shader_parameter("visibility_texture", visibility_viewport.get_texture())
 	fog_material.set_shader_parameter("exploration_texture", exploration_viewport.get_texture())
 	fog_material.set_shader_parameter("map_size", map_size)
