@@ -1,23 +1,30 @@
 ; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
 config_version=5
 
 [application]
+
 config/name="Game"
 run/main_scene="res://scenes/main/main.tscn"
 config/features=PackedStringArray("4.4")
 
 [autoload]
+
 EventBus="*res://scripts/core/event_bus.gd"
 EntityManager="*res://scripts/core/entity_manager.gd"
 DeterministicRandom="*res://scripts/core/deterministic_random.gd"
 
 [display]
+
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/stretch/mode="canvas_items"
-
-[rendering]
-renderer/rendering_method="forward_plus"
 
 [input]
 
@@ -50,4 +57,42 @@ camera_zoom_out={
 "deadzone": 0.5,
 "events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":5,"canceled":false,"pressed":false,"double_click":false,"script":null)
 ]
+}
+unit_select={
+"deadzone": 0.5,
+"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":1,"canceled":false,"pressed":false,"double_click":false,"script":null)
+]
+}
+unit_command={
+"deadzone": 0.5,
+"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":2,"canceled":false,"pressed":false,"double_click":false,"script":null)
+]
+}
+box_select_start={
+"deadzone": 0.5,
+"events": []
+}
+box_select_end={
+"deadzone": 0.5,
+"events": []
+}
+deselect_all={
+"deadzone": 0.5,
+"events": []
+}
+select_all={
+"deadzone": 0.5,
+"events": []
+}
+pause_game={
+"deadzone": 0.5,
+"events": []
+}
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+ui_cancel={
+"deadzone": 0.5,
+"events": []
 }
