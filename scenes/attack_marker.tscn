@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_attack"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="TorusMesh" id="TorusMesh_attack"]
+material = SubResource("StandardMaterial3D_attack")
+inner_radius = 0.4
+outer_radius = 0.5
+
+[sub_resource type="GDScript" id="GDScript_marker"]
+script/source = "extends Node3D
+
+func _ready():
+	var mesh_node = $MeshInstance3D
+	var tween = create_tween()
+	tween.tween_property(self, \"scale\", Vector3(1.5, 0.1, 1.5), 0.3)
+	tween.parallel().tween_property(mesh_node, \"transparency\", 1.0, 0.3)
+	tween.tween_callback(queue_free)
+"
+
+[node name="AttackMarker" type="Node3D"]
+script = SubResource("GDScript_marker")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.1, 0, 0, 0, 1, 0, 0.05, 0)
+mesh = SubResource("TorusMesh_attack")

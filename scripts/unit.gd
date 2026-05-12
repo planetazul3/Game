@@ -110,6 +110,9 @@ func die() -> void:
 	queue_free()
 
 func _play_sound(path: String) -> void:
+	if not ResourceLoader.exists(path):
+		return
+		
 	var sfx = AudioStreamPlayer3D.new()
 	var stream = load(path)
 	if stream:
@@ -118,9 +121,6 @@ func _play_sound(path: String) -> void:
 		sfx.global_position = global_position
 		sfx.play()
 		sfx.finished.connect(sfx.queue_free)
-	else:
-		# Silent if file missing, but logic exists
-		pass
 
 func _process_idle(_delta: float) -> void:
 	var units = get_tree().get_nodes_in_group("units")

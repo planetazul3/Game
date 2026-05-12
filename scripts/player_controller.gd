@@ -83,6 +83,7 @@ func _issue_move_command() -> void:
 		
 		# Check if we clicked an enemy unit
 		if target_obj.is_in_group("units") and target_obj.faction_id != 0:
+			_spawn_attack_marker(target_obj.global_position)
 			for unit in selected_units:
 				if is_instance_valid(unit):
 					unit.attack(target_obj)
@@ -96,6 +97,13 @@ func _issue_move_command() -> void:
 
 func _spawn_move_marker(pos: Vector3) -> void:
 	var marker_scene = load("res://scenes/move_marker.tscn")
+	if marker_scene:
+		var marker = marker_scene.instantiate()
+		get_tree().root.add_child(marker)
+		marker.global_position = pos
+
+func _spawn_attack_marker(pos: Vector3) -> void:
+	var marker_scene = load("res://scenes/attack_marker.tscn")
 	if marker_scene:
 		var marker = marker_scene.instantiate()
 		get_tree().root.add_child(marker)
