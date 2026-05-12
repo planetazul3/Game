@@ -16,9 +16,6 @@ config/features=PackedStringArray("4.4")
 
 [autoload]
 
-SceneManager="*res://scripts/core/scene_manager.gd"
-AudioManager="*res://scripts/core/audio_manager.gd"
-SaveManager="*res://scripts/core/save_manager.gd"
 
 [display]
 

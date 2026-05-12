@@ -1,4 +1,13 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
+
+[sub_resource type="GDScript" id="GDScript_marker"]
+script/source = "extends MeshInstance3D
+
+func _ready():
+	var tween = create_tween()
+	tween.tween_property(self, \"scale\", Vector3(0.1, 0.1, 0.1), 0.3).from(Vector3(1.5, 1.5, 1.5))
+	tween.tween_callback(queue_free)
+"
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_marker"]
 shading_mode = 0
@@ -13,12 +22,3 @@ outer_radius = 0.5
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
 mesh = SubResource("TorusMesh_marker")
 script = SubResource("GDScript_marker")
-
-[sub_resource type="GDScript" id="GDScript_marker"]
-script/source = "extends MeshInstance3D
-
-func _ready():
-	var tween = create_tween()
-	tween.tween_property(self, \"scale\", Vector3(0.1, 0.1, 0.1), 0.3).from(Vector3(1.5, 1.5, 1.5))
-	tween.tween_callback(queue_free)
-"

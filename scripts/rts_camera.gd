@@ -26,5 +26,10 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("camera_zoom_out"):
 		target_zoom = clamp(target_zoom + zoom_speed, min_zoom, max_zoom)
 		
+	# Middle Mouse Rotation
+	if Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
+		var mouse_delta = Input.get_last_mouse_velocity() * delta * 0.1
+		get_parent().rotate_y(-deg_to_rad(mouse_delta.x * rotate_speed))
+		
 	position.y = lerp(position.y, target_zoom, delta * 5.0)
 	look_at(get_parent().global_position, Vector3.UP)

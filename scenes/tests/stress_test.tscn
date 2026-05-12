@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://cx6i2vj4s8w3b"]
-
-[ext_resource type="Script" path="res://scripts/tests/stress_test.gd" id="1_scr"]
-
-[node name="StressTest" type="Node3D"]
-script = ExtResource("1_scr")

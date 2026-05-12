@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/unit.gd" id="1_unit"]
 
@@ -10,9 +10,17 @@ height = 1.8
 radius = 0.4
 height = 1.8
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ring"]
+shading_mode = 0
+albedo_color = Color(0, 1, 0, 1)
+
 [sub_resource type="TorusMesh" id="TorusMesh_ring"]
+material = SubResource("StandardMaterial3D_ring")
 inner_radius = 0.8
 outer_radius = 1.0
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_hp"]
+viewport_path = NodePath("SubViewport")
 
 [node name="Unit" type="CharacterBody3D"]
 script = ExtResource("1_unit")
@@ -34,3 +42,22 @@ avoidance_enabled = true
 [node name="SelectionRing" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
 mesh = SubResource("TorusMesh_ring")
+
+[node name="Sprite3D" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+billboard = 1
+texture = SubResource("ViewportTexture_hp")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+disable_3d = true
+transparent_bg = true
+size = Vector2i(100, 20)
+
+[node name="ProgressBar" type="ProgressBar" parent="SubViewport"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+value = 100.0
+show_percentage = false

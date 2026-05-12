@@ -10,6 +10,8 @@ var target_unit: Node3D = null
 
 @onready var nav_agent: NavigationAgent3D = $NavigationAgent3D
 @onready var selection_ring: MeshInstance3D = $SelectionRing
+@onready var hp_bar: ProgressBar = $SubViewport/ProgressBar
+@onready var mesh: MeshInstance3D = $MeshInstance3D
 
 enum State { IDLE, MOVE, ATTACK }
 var current_state: State = State.IDLE
@@ -23,12 +25,24 @@ func _ready() -> void:
 	target_position = global_position
 	selection_ring.visible = false
 	add_to_group("units")
+	
+	# Set faction color
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = Color.BLUE if faction_id == 0 else Color.RED
+	mesh.material_override = mat
+	
+	if faction_id != 0:
+		var ring_mat = StandardMaterial3D.new()
+		ring_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+		ring_mat.albedo_color = Color.RED
+		selection_ring.material_override = ring_mat
 
 func _physics_process(delta: float) -> void:
 	if hp <= 0:
 		return
 
 	selection_ring.visible = selected
+	hp_bar.value = hp
 	
 	match current_state:
 		State.IDLE:
@@ -39,10 +53,12 @@ func _physics_process(delta: float) -> void:
 			_process_attack(delta)
 
 func move_to(pos: Vector3) -> void:
-	target_position = pos
+	# Add slight random offset to prevent perfect stacking
+	var offset = Vector3(randf_range(-0.5, 0.5), 0, randf_range(-0.5, 0.5))
+	target_position = pos + offset
 	target_unit = null
 	current_state = State.MOVE
-	nav_agent.set_target_position(pos)
+	nav_agent.set_target_position(target_position)
 
 func attack(target: Node3D) -> void:
 	target_unit = target
@@ -54,15 +70,24 @@ func take_damage(amount: int) -> void:
 		die()
 
 func die() -> void:
+	# Spawn explosion or just free
 	queue_free()
 
 func _process_idle(_delta: float) -> void:
-	# Basic AI: scan for enemies if we are an enemy or if we are idle
-	var enemies = get_tree().get_nodes_in_group("units")
-	for enemy in enemies:
-		if enemy.faction_id != faction_id and global_position.distance_to(enemy.global_position) < 10.0:
-			attack(enemy)
-			break
+	# Basic AI: scan for enemies
+	var units = get_tree().get_nodes_in_group("units")
+	var nearest_enemy = null
+	var min_dist = 15.0
+	
+	for unit in units:
+		if unit.faction_id != faction_id:
+			var d = global_position.distance_to(unit.global_position)
+			if d < min_dist:
+				min_dist = d
+				nearest_enemy = unit
+	
+	if nearest_enemy:
+		attack(nearest_enemy)
 
 func _process_move(delta: float) -> void:
 	if nav_agent.is_navigation_finished():
@@ -70,14 +95,13 @@ func _process_move(delta: float) -> void:
 		return
 
 	var next_path_pos: Vector3 = nav_agent.get_next_path_position()
-	var current_agent_pos: Vector3 = global_position
-	var new_velocity: Vector3 = (next_path_pos - current_agent_pos).normalized() * speed
+	var new_velocity: Vector3 = (next_path_pos - global_position).normalized() * speed
 	
-	# Simple separation/repulsion
-	var separation = _calculate_separation()
-	new_velocity += separation * 2.0
+	# Separation
+	var push = _calculate_separation()
+	new_velocity += push * 3.0
 	
-	velocity = new_velocity
+	velocity = velocity.lerp(new_velocity, delta * 10.0)
 	move_and_slide()
 	
 	if velocity.length() > 0.1:
