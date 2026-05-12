@@ -1,0 +1,19 @@
+{
+  "project_name": "Godot 4 Game",
+  "version": "1.0.0",
+  "agent_config": {
+    "preferred_mempalace_wing": "wing_godot_game",
+    "system_patterns": {
+      "decoupling": "EventBus",
+      "core_scripts": "scripts/core/",
+      "systems": "scripts/systems/",
+      "components": "scripts/components/"
+    },
+    "guidelines": [
+      "Always use type hints in GDScript.",
+      "Prefer EventBus signals over direct node references for inter-system communication.",
+      "Use Vector3 for all world-space calculations.",
+      "Run 'gdlint' or Godot headless check after modifications."
+    ]
+  }
+}
