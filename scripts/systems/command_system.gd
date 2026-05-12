@@ -11,16 +11,12 @@ func process_commands(commands: Array) -> void:
 func _execute_command(cmd: CommandBuffer.Command) -> void:
 	print("CommandSystem: Executing ", cmd.command_type, " from ", cmd.issuer_id, " at tick ", cmd.tick)
 	
-	# Mapping commands to EventBus signals for system decoupling
-	# This keeps CommandSystem focused on management and distribution
-	match cmd.command_type:
-		"move":
-			# Find units issued by this commander (placeholder logic for now)
-			# In a real implementation, we would query EntityManager for units owned by issuer_id
-			var units: Array[Node] = []
-			# Example: EventBus.command_issued.emit(units, "move", cmd.position)
-			pass
-		"attack":
-			pass
-		"gather":
-			pass
+	# In a real implementation, we'd find units by issuer_id
+	# For now, we assume a single selection or similar
+	var entities = EntityManager.get_nodes_with_component("AIComponent")
+	var ai_system = get_parent().get_node_or_null("AISystem")
+	
+	for entity in entities:
+		# Filter by faction/issuer logic would go here
+		if ai_system:
+			ai_system.handle_unit_command(entity, cmd.command_type, cmd.position if cmd.command_type == "move" else cmd.target_id)
