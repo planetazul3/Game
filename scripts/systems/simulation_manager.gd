@@ -15,6 +15,18 @@ var _victory_conditions: Array[VictoryCondition] = []
 var _match_ended: bool = false
 
 func _ready() -> void:
+	# CLI Parsing
+	var args = OS.get_cmdline_args()
+	for arg in args:
+		if arg.begins_with("--seed="):
+			var s = int(arg.split("=")[1])
+			seed_simulation(s)
+		if arg.begins_with("--tickrate="):
+			var tr = float(arg.split("=")[1])
+			# Update TICK_RATE constants if they were non-const, but here they are const.
+			# For now just log it.
+			print("SimulationManager: Tickrate override requested: ", tr)
+
 	# Enforce deterministic system execution order
 	var system_order: Array[String] = [
 		"CommandSystem",

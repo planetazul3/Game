@@ -30,6 +30,7 @@ FactionRegistry="*res://scripts/core/faction_registry.gd"
 TransformIntegrator="*res://scripts/simulation/transform_integrator.gd"
 JobSystem="*res://scripts/core/job_system.gd"
 EffectProcessor="*res://scripts/abilities/effect_processor.gd"
+NetworkManager="*res://scripts/network/network_manager.gd"
 
 [display]
 
