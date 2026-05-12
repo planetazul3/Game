@@ -3,6 +3,7 @@ class_name SimulationManager
 
 var current_tick := 0
 var simulation_running := true
+var active_factions: Array = []
 
 # Systems to be ticked in a deterministic order
 var _systems: Array[Node] = []
@@ -18,7 +19,6 @@ func _ready() -> void:
 func register_victory_condition(vc: VictoryCondition) -> void:
 	if vc not in _victory_conditions:
 		_victory_conditions.append(vc)
-		vc.condition_met.connect(_on_victory_condition_met)
 
 func _on_victory_condition_met(faction_id: int, reason: String) -> void:
 	if _match_ended: return
@@ -41,4 +41,5 @@ func _physics_process(delta: float) -> void:
 	# Evaluate victory
 	if not _match_ended and current_tick % 60 == 0: # Check once a second
 		for vc in _victory_conditions:
-			vc.evaluate()
+			if vc.evaluate(self):
+				_on_victory_condition_met(0, "Condition Met") # Placeholder for faction/reason

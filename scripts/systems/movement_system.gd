@@ -21,7 +21,7 @@ func simulation_tick(delta: float) -> void:
 			entities_to_move.remove_at(i)
 			continue
 
-		var move_comp = entity.get_node_or_null("MovementComponent")
+		var move_comp = entity.get("movement_component") as MovementComponent
 		var nav_agent = entity.get_node_or_null("NavigationAgent3D")
 		if not move_comp or not nav_agent:
 			continue
@@ -68,7 +68,7 @@ func _on_command_issued(units: Array[Node], command_type: String, target: Varian
 			var unit = units[i]
 			if not is_instance_valid(unit): continue
 
-			var move_comp = unit.get_node_or_null("MovementComponent")
+			var move_comp = unit.get("movement_component") as MovementComponent
 			if move_comp:
 				if units.size() > 1:
 					var row = i / columns

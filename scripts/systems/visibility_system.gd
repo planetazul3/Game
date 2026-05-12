@@ -33,7 +33,7 @@ func _recalculate_visibility() -> void:
 		var entity = sel.get_parent()
 		if not is_instance_valid(entity): continue
 
-		var vis_comp = entity.get_node_or_null("VisibilityComponent")
+		var vis_comp = entity.get("visibility_component") as VisibilityComponent
 		if not vis_comp: continue
 
 		var cell = Vector2i(
@@ -54,7 +54,7 @@ func _recalculate_visibility() -> void:
 		var entity = sel.get_parent()
 		if not is_instance_valid(entity): continue
 
-		var vis_comp = entity.get_node_or_null("VisibilityComponent")
+		var vis_comp = entity.get("visibility_component") as VisibilityComponent
 		if not vis_comp or vis_comp.faction_id == player_faction_id: continue
 
 		var currently_visible = false
@@ -62,7 +62,7 @@ func _recalculate_visibility() -> void:
 		# Check against all player sources in range using grid
 		var target_cell = vis_comp.grid_cell
 		for source in player_vision_sources:
-			var s_vis = source.get_node("VisibilityComponent")
+			var s_vis = source.get("visibility_component") as VisibilityComponent
 			var cell_radius = int(ceil(s_vis.vision_range / GRID_CELL_SIZE))
 
 			if abs(target_cell.x - s_vis.grid_cell.x) <= cell_radius and abs(target_cell.y - s_vis.grid_cell.y) <= cell_radius:
@@ -73,13 +73,13 @@ func _recalculate_visibility() -> void:
 
 		# Evaluate state transitions deterministically
 		if currently_visible:
-			if vis_comp.state != VisibilityComponent.VisibilityState.VISIBLE:
-				vis_comp.state = VisibilityComponent.VisibilityState.VISIBLE
+			if vis_comp.current_state != VisibilityComponent.VisibilityState.VISIBLE:
+				vis_comp.current_state = VisibilityComponent.VisibilityState.VISIBLE
 				EventBus.visibility_changed.emit(entity, true)
 		else:
 			# Not currently visible
-			if vis_comp.state == VisibilityComponent.VisibilityState.VISIBLE:
+			if vis_comp.current_state == VisibilityComponent.VisibilityState.VISIBLE:
 				# Drop down to explored
-				vis_comp.state = VisibilityComponent.VisibilityState.EXPLORED
+				vis_comp.current_state = VisibilityComponent.VisibilityState.EXPLORED
 				EventBus.visibility_changed.emit(entity, false)
 			# If already UNEXPLORED or EXPLORED, it stays that way.
