@@ -1,21 +1,15 @@
 {
-  "project_name": "Godot 4 Game",
-  "version": "1.0.0",
-  "agent_config": {
-    "preferred_mempalace_wing": "wing_godot_game",
-    "system_patterns": {
-      "decoupling": "EventBus",
-      "core_scripts": "scripts/core/",
-      "systems": "scripts/systems/",
-      "components": "scripts/components/"
-    },
-    "guidelines": [
-      "Always use type hints in GDScript.",
-      "Prefer EventBus signals over direct node references for inter-system communication.",
-      "Use Vector3 for all world-space calculations.",
-      "Enforce atomic commits and always push to origin.",
-      "Review CI status and fix any lint/build errors immediately.",
-      "Maintain a professional, complete-solution approach (anti-laziness)."
-    ]
-  }
+  "project_type": "Godot RTS Prototype",
+  "guidelines": [
+    "Gameplay First: Fun and responsiveness over architectural purity.",
+    "Native Godot: Use built-in nodes and signals directly.",
+    "Minimal Abstraction: No unnecessary managers or decoupling layers.",
+    "Rapid Iteration: Keep scripts small and understandable."
+  ],
+  "forbidden": [
+    "EventBus",
+    "SimulationManager",
+    "Lockstep Networking",
+    "Generic ECS frameworks"
+  ]
 }

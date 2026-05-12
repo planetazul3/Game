@@ -33,11 +33,31 @@ func _process(delta: float) -> void:
 		queue_free()
 "
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_trail"]
+shading_mode = 0
+albedo_color = Color(1, 1, 0.5, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_trail"]
+material = SubResource("StandardMaterial3D_trail")
+radius = 0.05
+height = 0.1
+
+[sub_resource type="Curve" id="Curve_trail"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -1.0, 0.0, 0, 0]
+point_count = 2
+
 [node name="Bullet" type="Node3D"]
 script = SubResource("GDScript_bullet")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("SphereMesh_bullet")
+
+[node name="Trail" type="CPUParticles3D" parent="."]
+amount = 10
+lifetime = 0.2
+mesh = SubResource("SphereMesh_trail")
+gravity = Vector3(0, 0, 0)
+scale_amount_curve = SubResource("Curve_trail")
 
 [node name="Area3D" type="Area3D" parent="."]
 

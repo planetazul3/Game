@@ -23,10 +23,12 @@ var attack_timer: float = 0.0
 
 var _original_material: StandardMaterial3D
 
+@export var turn_speed: float = 10.0
+
 func _ready() -> void:
 	target_position = global_position
 	selection_ring.visible = false
-	add_to_group("units")
+	UnitRegistry.register(self)
 	
 	# Set faction color
 	_original_material = StandardMaterial3D.new()
@@ -49,6 +51,9 @@ func _ready() -> void:
 		ring_mat.emission = Color.GREEN
 		ring_mat.emission_energy_multiplier = 2.0
 		selection_ring.material_override = ring_mat
+
+func _exit_tree() -> void:
+	UnitRegistry.unregister(self)
 
 func _physics_process(delta: float) -> void:
 	if hp <= 0:
@@ -127,27 +132,26 @@ func _play_sound(path: String) -> void:
 		sfx.finished.connect(sfx.queue_free)
 
 func _process_idle(_delta: float) -> void:
-	var units = get_tree().get_nodes_in_group("units")
+	var units = UnitRegistry.units
 	var nearest_enemy = null
 	var min_dist = 30.0
 	
 	for unit in units:
-		if unit.faction_id != faction_id:
+		if is_instance_valid(unit) and unit.faction_id != faction_id:
 			var d = global_position.distance_to(unit.global_position)
 			if d < min_dist:
 				min_dist = d
 				nearest_enemy = unit
 	
 	if nearest_enemy:
-		print("Unit ", name, " (Faction ", faction_id, ") spotted enemy ", nearest_enemy.name)
 		attack(nearest_enemy)
 
 func _process_move(delta: float) -> void:
 	if is_attack_moving:
 		# Scan for enemies while moving
-		var units = get_tree().get_nodes_in_group("units")
+		var units = UnitRegistry.units
 		for unit in units:
-			if unit.faction_id != faction_id and global_position.distance_to(unit.global_position) < 15.0:
+			if is_instance_valid(unit) and unit.faction_id != faction_id and global_position.distance_to(unit.global_position) < 15.0:
 				attack(unit)
 				return
 
@@ -162,7 +166,7 @@ func _process_move(delta: float) -> void:
 	var push = _calculate_separation()
 	new_velocity += push * 4.0
 	
-	# Mass-based acceleration (lower multiplier = heavier feel)
+	# Mass-based acceleration
 	velocity = velocity.lerp(new_velocity, delta * 6.0) 
 	move_and_slide()
 	
@@ -173,8 +177,7 @@ func _process_move(delta: float) -> void:
 	mesh.scale.z = 1.0 - walk_cycle
 	
 	if velocity.length() > 0.5:
-		var look_target = global_position + velocity
-		look_at(Vector3(look_target.x, global_position.y, look_target.z), Vector3.UP)
+		_smooth_look_at(global_position + velocity, delta)
 
 func _process_attack(delta: float) -> void:
 	if not is_instance_valid(target_unit) or target_unit.hp <= 0:
@@ -190,23 +193,19 @@ func _process_attack(delta: float) -> void:
 		velocity = velocity.lerp(Vector3.ZERO, delta * 15.0)
 		move_and_slide()
 		
-		# Look at target
-		var look_target = target_unit.global_position
-		look_at(Vector3(look_target.x, global_position.y, look_target.z), Vector3.UP)
+		# Smoothly rotate to target
+		_smooth_look_at(target_unit.global_position, delta)
 		
 		attack_timer -= delta
 		
 		# Attack Anticipation (Windup)
 		if attack_timer < 0.2 and attack_timer > 0:
-			# Squish down before firing
 			mesh.scale = mesh.scale.lerp(Vector3(1.2, 0.8, 1.2), delta * 20.0)
 		elif attack_timer <= 0:
 			_fire_projectile()
 			attack_timer = attack_cooldown
-			# Kickback effect
 			mesh.scale = Vector3(0.8, 1.4, 0.8)
 		else:
-			# Reset scale during cooldown
 			mesh.scale = mesh.scale.lerp(Vector3.ONE, delta * 10.0)
 
 func _fire_projectile() -> void:
@@ -218,11 +217,18 @@ func _fire_projectile() -> void:
 		bullet.target = target_unit
 		bullet.damage = attack_damage
 
+func _smooth_look_at(target_pos: Vector3, delta: float) -> void:
+	var look_target = Vector3(target_pos.x, global_position.y, target_pos.z)
+	if global_position.distance_to(look_target) < 0.1: return
+	
+	var target_transform = transform.looking_at(look_target, Vector3.UP)
+	transform = transform.interpolate_with(target_transform, delta * turn_speed)
+
 func _calculate_separation() -> Vector3:
 	var push = Vector3.ZERO
-	var units = get_tree().get_nodes_in_group("units")
+	var units = UnitRegistry.units
 	for other in units:
-		if other == self: continue
+		if not is_instance_valid(other) or other == self: continue
 		var dist = global_position.distance_to(other.global_position)
 		if dist < 2.0:
 			push += (global_position - other.global_position).normalized() * (2.0 - dist)
