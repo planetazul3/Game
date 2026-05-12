@@ -54,4 +54,4 @@ func _ready() -> void:
 
 func _on_unit_died(unit: Node) -> void:
 	if unit == self:
-		EntityManager.destroy_entity(self)
+		EntityFactory.destroy_entity(self)

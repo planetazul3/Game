@@ -4,23 +4,18 @@ var _next_entity_id: int = 1
 var _entities: Dictionary = {}
 var _component_cache: Dictionary = {}
 
-func spawn_entity(scene: PackedScene, parent: Node, position: Vector3) -> Node:
-	var instance = scene.instantiate()
-
+func register_entity(instance: Node) -> int:
 	# Assign ID for deterministic serialization
 	var entity_id: int = _next_entity_id
 	instance.set_meta("entity_id", entity_id)
 	_next_entity_id += 1
-
-	parent.add_child(instance)
-	instance.global_position = position
 
 	_entities[entity_id] = instance
 
 	# Register components in cache
 	_register_instance_components(entity_id, instance)
 
-	return instance
+	return entity_id
 
 func _register_instance_components(entity_id: int, instance: Node) -> void:
 	if "health_component" in instance: register_component(entity_id, "HealthComponent")
@@ -61,8 +56,6 @@ func destroy_entity(entity: Node) -> void:
 		var entity_id: int = entity.get_meta("entity_id")
 		_entities.erase(entity_id)
 		unregister_entity_from_cache(entity_id)
-
-	entity.queue_free()
 
 func get_entity(id: int) -> Node:
 	return _entities.get(id, null)
