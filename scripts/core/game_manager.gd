@@ -1,11 +1,10 @@
 extends Node
-
 class_name GameManager
 
-var current_match_time := 0.0
-var active_factions := []
+var current_match_time: float = 0.0
+var active_factions: Array = []
 
-func _process(delta: float) -> void:
+func tick(delta: float) -> void:
 	current_match_time += delta
 
 func register_faction(faction_name: String) -> void:

@@ -1,20 +1,39 @@
 extends Node
 class_name SimulationManager
 
-var current_tick := 0
-var simulation_running := true
+const TICK_RATE: float = 30.0
+const TICK_DELTA: float = 1.0 / TICK_RATE
+
+var current_tick: int = 0
+var simulation_running: bool = true
+var accumulator: float = 0.0
+
+var command_buffer: CommandBuffer = CommandBuffer.new()
+var _ordered_systems: Array[Node] = []
 var active_factions: Array = []
-
-# Systems to be ticked in a deterministic order
-var _systems: Array[Node] = []
-
 var _victory_conditions: Array[VictoryCondition] = []
-var _match_ended := false
+var _match_ended: bool = false
 
 func _ready() -> void:
-	for child in get_parent().get_children():
-		if child != self and child.has_method("simulation_tick"):
-			_systems.append(child)
+	# Enforce deterministic system execution order
+	var system_order: Array[String] = [
+		"CommandSystem",
+		"AISystem",
+		"NavigationSystem",
+		"MovementSystem",
+		"CombatSystem",
+		"ResourceSystem",
+		"VisibilitySystem"
+	]
+	
+	var systems_node = get_parent()
+	for system_name in system_order:
+		var system = systems_node.get_node_or_null(system_name)
+		if system:
+			_ordered_systems.append(system)
+			print("SimulationManager: Registered system ", system_name)
+		else:
+			push_warning("SimulationManager: Required system missing: " + system_name)
 
 func register_victory_condition(vc: VictoryCondition) -> void:
 	if vc not in _victory_conditions:
@@ -25,21 +44,40 @@ func _on_victory_condition_met(faction_id: int, reason: String) -> void:
 	_match_ended = true
 	print("Match Ended! Faction ", faction_id, " won via ", reason)
 
-func register_system(system: Node) -> void:
-	if system not in _systems and system.has_method("simulation_tick"):
-		_systems.append(system)
-
-func _physics_process(delta: float) -> void:
+func _process(delta: float) -> void:
 	if not simulation_running:
 		return
 
+	accumulator += delta
+	
+	while accumulator >= TICK_DELTA:
+		_simulation_step(TICK_DELTA)
+		accumulator -= TICK_DELTA
+
+func _simulation_step(delta_fixed: float) -> void:
 	current_tick += 1
+	
+	# Consume commands for this tick
+	var tick_commands = command_buffer.consume_tick_commands(current_tick)
+	
+	# Distribute commands to systems (primarily CommandSystem)
+	for system in _ordered_systems:
+		if system is CommandSystem:
+			system.process_commands(tick_commands)
+		
+		if system.has_method("tick"):
+			system.tick(delta_fixed)
+		elif system.has_method("simulation_tick"):
+			system.simulation_tick(delta_fixed)
 
-	for system in _systems:
-		system.simulation_tick(delta)
-
-	# Evaluate victory
-	if not _match_ended and current_tick % 60 == 0: # Check once a second
+	# Evaluate victory conditions deterministically every second (30 ticks)
+	if not _match_ended and current_tick % 30 == 0:
 		for vc in _victory_conditions:
 			if vc.evaluate(self):
-				_on_victory_condition_met(0, "Condition Met") # Placeholder for faction/reason
+				_on_victory_condition_met(0, "Condition Met")
+
+func seed_simulation(simulation_seed: int) -> void:
+	var deterministic_rng = get_node_or_null("/root/DeterministicRandom")
+	if deterministic_rng:
+		deterministic_rng._rng.seed = simulation_seed
+		print("SimulationManager: Seeded simulation with ", simulation_seed)
