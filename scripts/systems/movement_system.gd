@@ -2,21 +2,20 @@ extends Node
 class_name MovementSystem
 
 var entities_to_move: Array[Node] = []
-var pathfinding_throttle_timer: float = 0.0
-var pathfinding_interval: float = 0.2
-var arrival_tolerance: float = 1.0
+var path_request_queue: Array[int] = [] # entity_ids
+var max_path_requests_per_tick: int = 10
+var arrival_tolerance: float = 0.5
+var waypoint_tolerance: float = 0.2
 
 func _ready() -> void:
 	EventBus.safe_connect("command_issued", _on_command_issued)
 	EventBus.combat_interrupt_movement.connect(_on_combat_interrupt_movement)
 
-
 func tick(delta: float) -> void:
-	pathfinding_throttle_timer -= delta
-	var can_pathfind = pathfinding_throttle_timer <= 0
-	if can_pathfind:
-		pathfinding_throttle_timer = pathfinding_interval
+	# 1. Process Path Requests (Throttled)
+	_process_path_requests()
 
+	# 2. Update Movement
 	for i in range(entities_to_move.size() - 1, -1, -1):
 		var entity = entities_to_move[i]
 		if not is_instance_valid(entity):
@@ -24,72 +23,89 @@ func tick(delta: float) -> void:
 			continue
 
 		var move_comp = entity.get("movement_component") as MovementComponent
-		var nav_agent = entity.get_node_or_null("NavigationAgent3D")
-		if not move_comp or not nav_agent:
+		if not move_comp or not move_comp.has_target or not move_comp.is_path_ready:
 			continue
 
-		if not move_comp.has_target:
-			continue
+		_follow_path(entity, move_comp, delta)
 
-		var dist_to_target = entity.global_position.distance_to(move_comp.target_position)
-		if dist_to_target <= arrival_tolerance:
+func _process_path_requests() -> void:
+	var processed = 0
+	while path_request_queue.size() > 0 and processed < max_path_requests_per_tick:
+		var entity_id = path_request_queue.pop_front()
+		var entity = EntityManager.get_entity(entity_id)
+		if not is_instance_valid(entity): continue
+		
+		var move_comp = entity.get("movement_component") as MovementComponent
+		if not move_comp: continue
+		
+		var map = get_tree().root.get_world_3d().navigation_map
+		var path = NavigationServer3D.map_get_path(map, entity.global_position, move_comp.target_position, true)
+		
+		move_comp.path = path
+		move_comp.path_index = 0
+		move_comp.is_path_ready = true
+		processed += 1
+
+func _follow_path(entity: Node, move_comp: MovementComponent, delta: float) -> void:
+	if move_comp.path_index >= move_comp.path.size():
+		move_comp.has_target = false
+		return
+
+	var target_waypoint = move_comp.path[move_comp.path_index]
+	var pos = entity.global_position
+	var dir = pos.direction_to(target_waypoint)
+	var dist = pos.distance_to(target_waypoint)
+
+	# If reached waypoint, move to next
+	if dist <= waypoint_tolerance:
+		move_comp.path_index += 1
+		if move_comp.path_index >= move_comp.path.size():
 			move_comp.has_target = false
 			if entity is CharacterBody3D:
 				entity.velocity = Vector3.ZERO
-			continue
+			return
+		# Recalculate for next waypoint in same tick if needed? 
+		# For simplicity, just update target for next tick
+		target_waypoint = move_comp.path[move_comp.path_index]
+		dir = pos.direction_to(target_waypoint)
 
-		if can_pathfind:
-			nav_agent.target_position = move_comp.target_position
+	if entity is CharacterBody3D:
+		var intended_vel = dir * move_comp.move_speed
+		entity.velocity = entity.velocity.lerp(intended_vel, delta * move_comp.acceleration)
+		entity.move_and_slide()
+		SpatialGrid.update_entity(entity, entity.global_position)
 
-		if not nav_agent.is_navigation_finished():
-			var next_pos = nav_agent.get_next_path_position()
-			var dir = entity.global_position.direction_to(next_pos)
-
-			if entity is CharacterBody3D:
-				# Stuck recovery basic: if velocity is tiny but we have a target, apply slight jitter
-				var intended_vel = dir * move_comp.move_speed
-
-				# Simple collision avoidance / soft repathing proxy
-				entity.velocity = entity.velocity.lerp(intended_vel, delta * move_comp.acceleration)
-				entity.move_and_slide()
-				SpatialGrid.update_entity(entity, entity.global_position)
-
-				if entity.velocity.length() > 0.1:
-					var look_target = entity.global_position + entity.velocity
-					entity.look_at(Vector3(look_target.x, entity.global_position.y, look_target.z), Vector3.UP)
-		else:
-			move_comp.has_target = false
+		if entity.velocity.length() > 0.1:
+			var look_target = entity.global_position + entity.velocity
+			entity.look_at(Vector3(look_target.x, entity.global_position.y, look_target.z), Vector3.UP)
 
 func _on_command_issued(units: Array[Node], command_type: String, target: Variant) -> void:
 	if command_type == "move":
 		var target_pos = target as Vector3
-		var formation_offset := Vector3.ZERO
-		var spacing := 2.0
-		var columns := int(ceil(sqrt(units.size())))
-
-		for i in range(units.size()):
-			var unit = units[i]
+		for unit in units:
 			if not is_instance_valid(unit): continue
-
 			var move_comp = unit.get("movement_component") as MovementComponent
 			if move_comp:
-				if units.size() > 1:
-					var row = i / columns
-					var col = i % columns
-					formation_offset = Vector3(col * spacing - (columns * spacing / 2.0), 0, row * spacing - (columns * spacing / 2.0))
-
-				move_comp.target_position = target_pos + formation_offset
+				move_comp.target_position = target_pos
 				move_comp.has_target = true
+				move_comp.is_path_ready = false
+				
+				var id = unit.get_meta("entity_id")
+				if id not in path_request_queue:
+					path_request_queue.append(id)
 				if unit not in entities_to_move:
 					entities_to_move.append(unit)
 
 func _on_combat_interrupt_movement(entity_id: int, new_target_position: Vector3) -> void:
-	var entity = instance_from_id(entity_id)
+	var entity = EntityManager.get_entity(entity_id)
 	if is_instance_valid(entity):
 		var move_comp = entity.get("movement_component") as MovementComponent
 		if move_comp:
 			move_comp.target_position = new_target_position
 			move_comp.has_target = true
+			move_comp.is_path_ready = false
+			if entity_id not in path_request_queue:
+				path_request_queue.append(entity_id)
 			if entity not in entities_to_move:
 				entities_to_move.append(entity)
 
