@@ -20,6 +20,7 @@ func _ready() -> void:
 		"CommandSystem",
 		"AISystem",
 		"NavigationSystem",
+		"FormationSystem",
 		"MovementSystem",
 		"CombatSystem",
 		"ResourceSystem",

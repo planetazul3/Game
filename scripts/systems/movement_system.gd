@@ -82,11 +82,18 @@ func _follow_path(entity: Node, move_comp: MovementComponent, delta: float) -> v
 func _on_command_issued(units: Array[Node], command_type: String, target: Variant) -> void:
 	if command_type == "move":
 		var target_pos = target as Vector3
+		
+		var formation_sys = get_parent().get_node_or_null("FormationSystem")
+		var offsets = {}
+		if formation_sys:
+			offsets = formation_sys.get_formation_offsets(units, 0) # BOX = 0
+		
 		for unit in units:
 			if not is_instance_valid(unit): continue
 			var move_comp = unit.get("movement_component") as MovementComponent
 			if move_comp:
-				move_comp.target_position = target_pos
+				var offset = offsets.get(unit, Vector3.ZERO)
+				move_comp.target_position = target_pos + offset
 				move_comp.has_target = true
 				move_comp.is_path_ready = false
 				

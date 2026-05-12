@@ -11,7 +11,8 @@
 [ext_resource type="Script" path="res://scripts/systems/ai_system.gd" id="9_ai"]
 [ext_resource type="Script" path="res://scripts/systems/movement_system.gd" id="10_mov"]
 [ext_resource type="Script" path="res://scripts/systems/visibility_system.gd" id="11_vis"]
-[ext_resource type="Script" path="res://scripts/main_level.gd" id="12_main"]
+[ext_resource type="Script" path="res://scripts/systems/formation_system.gd" id="12_for"]
+[ext_resource type="Script" path="res://scripts/main_level.gd" id="13_main"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_grnd"]
 size = Vector2(100, 100)
@@ -20,7 +21,7 @@ size = Vector2(100, 100)
 size = Vector3(100, 1, 100)
 
 [node name="Main" type="Node3D"]
-script = ExtResource("12_main")
+script = ExtResource("13_main")
 
 [node name="Systems" type="Node" parent="."]
 
@@ -53,6 +54,9 @@ script = ExtResource("10_mov")
 
 [node name="VisibilitySystem" type="Node" parent="Systems"]
 script = ExtResource("11_vis")
+
+[node name="FormationSystem" type="Node" parent="Systems"]
+script = ExtResource("12_for")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 10, 0)
