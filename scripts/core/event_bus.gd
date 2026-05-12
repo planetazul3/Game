@@ -16,6 +16,8 @@ signal combat_ended(attacker: Node, target: Node)
 signal combat_interrupt_movement(entity_id: int, new_target_position: Vector3)
 signal selection_area_defined(start: Vector2, end: Vector2)
 signal input_command_issued(order_type: String, target: Variant, position: Vector3)
+signal selection_single_click(click_position: Vector2)
+
 
 
 
