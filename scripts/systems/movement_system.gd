@@ -11,77 +11,62 @@ func _ready() -> void:
 	EventBus.safe_connect("command_issued", _on_command_issued)
 
 func tick(delta: float) -> void:
-	# 1. Process Path Requests (Throttled)
-	_process_path_requests()
-
-	# 2. Update Movement
-	for i in range(entities_to_move.size() - 1, -1, -1):
-		var entity = entities_to_move[i]
-		if not is_instance_valid(entity):
-			entities_to_move.remove_at(i)
+	var units = get_tree().get_nodes_in_group("units")
+	for unit in units:
+		if not is_instance_valid(unit): continue
+		var move_comp = unit.get("movement_component")
+		if not move_comp or not move_comp.has_target:
 			continue
-
-		var move_comp = entity.get("movement_component") as MovementComponent
-		if not move_comp or not move_comp.has_target or not move_comp.is_path_ready:
-			continue
-
-		_follow_path(entity, move_comp, delta)
-
-func _process_path_requests() -> void:
-	var processed = 0
-	while path_request_queue.size() > 0 and processed < max_path_requests_per_tick:
-		var entity_id = path_request_queue.pop_front()
-		var entity = EntityManager.get_entity(entity_id)
-		if not is_instance_valid(entity): continue
 		
-		var move_comp = entity.get("movement_component") as MovementComponent
-		if not move_comp: continue
-		
-		var map = get_tree().root.get_world_3d().navigation_map
-		var path = NavigationServer3D.map_get_path(map, entity.global_position, move_comp.target_position, true)
-		
-		move_comp.path = path
-		move_comp.path_index = 0
-		move_comp.is_path_ready = true
-		processed += 1
+		_move_unit(unit, move_comp, delta)
 
-func _follow_path(entity: Node, move_comp: MovementComponent, delta: float) -> void:
+func _move_unit(unit: Node, move_comp: MovementComponent, delta: float) -> void:
+	var current_pos = unit.global_position
+	var target_pos = move_comp.target_position
+	
+	# 1. Calculate direction
 	var dir = Vector3.ZERO
 	
 	if move_comp.current_flow_field:
 		var ff_mgr = get_parent().get_node_or_null("FlowFieldManager")
 		if ff_mgr:
-			var grid_pos = ff_mgr.world_to_grid(move_comp.simulation_position)
+			var grid_pos = ff_mgr.world_to_grid(current_pos)
 			var flow_dir = move_comp.current_flow_field.get_direction(grid_pos.x, grid_pos.y)
 			dir = Vector3(flow_dir.x, 0, flow_dir.y)
-			
-			# Arrival check
-			var dist_to_target = move_comp.simulation_position.distance_to(move_comp.target_position)
-			if dist_to_target < arrival_tolerance:
-				move_comp.has_target = false
-				return
 	
 	if dir.is_zero_approx():
-		# Fallback or stationary
+		# Use direct steering toward target as fallback
+		dir = (target_pos - current_pos).normalized()
+		dir.y = 0
+	
+	# 2. Check for arrival
+	var dist = current_pos.distance_to(target_pos)
+	if dist < arrival_tolerance:
 		move_comp.has_target = false
 		return
-
+		
+	# 3. Calculate velocity
 	var intended_vel = dir * move_comp.move_speed
 	
-	# Deterministic Integration
-	var next_pos = TransformIntegrator.integrate(move_comp.simulation_position, intended_vel, delta)
+	# 4. Integrate position
+	var next_pos = current_pos + intended_vel * delta
 	
-	# Deterministic Collision (Circle)
-	var neighbors = SpatialGrid.query_radius(next_pos, 2.0)
-	next_pos = TransformIntegrator.resolve_collisions(entity, next_pos, 0.5, neighbors)
+	# 5. Simple Collision Avoidance (Avoid overlapping)
+	var neighbors = get_tree().get_nodes_in_group("units")
+	for other in neighbors:
+		if other == unit: continue
+		var other_pos = other.global_position
+		var d = next_pos.distance_to(other_pos)
+		if d < 1.0: # Minimum distance between units
+			var avoid_dir = (next_pos - other_pos).normalized()
+			next_pos += avoid_dir * (1.0 - d) * 0.5
+			
+	unit.global_position = next_pos
 	
-	move_comp.simulation_position = next_pos
-	entity.global_position = next_pos 
-	SpatialGrid.update_entity(entity, next_pos)
-
+	# 6. Face movement direction
 	if intended_vel.length() > 0.1:
 		var look_target = next_pos + intended_vel
-		entity.look_at(Vector3(look_target.x, next_pos.y, look_target.z), Vector3.UP)
+		unit.look_at(Vector3(look_target.x, next_pos.y, look_target.z), Vector3.UP)
 
 func _on_command_issued(units: Array[Node], command_type: String, target: Variant) -> void:
 	if command_type == "move":

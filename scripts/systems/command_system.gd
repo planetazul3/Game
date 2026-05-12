@@ -9,14 +9,15 @@ func process_commands(commands: Array) -> void:
 		_execute_command(cmd)
 
 func _execute_command(cmd: CommandBuffer.Command) -> void:
-	print("CommandSystem: Executing ", cmd.command_type, " from ", cmd.issuer_id, " at tick ", cmd.tick)
-	
-	# In a real implementation, we'd find units by issuer_id
-	# For now, we assume a single selection or similar
-	var entities = EntityManager.get_nodes_with_component("AIComponent")
+	# Find the specific unit by its target_id (reusing target_id as the subject for now)
+	var unit = EntityManager.get_entity(cmd.target_id)
+	if not is_instance_valid(unit):
+		return
+		
+	# Verify faction authorization
+	if unit.get("faction_id") != cmd.issuer_id:
+		return
+		
 	var ai_system = get_parent().get_node_or_null("AISystem")
-	
-	for entity in entities:
-		# Filter by faction/issuer logic would go here
-		if ai_system:
-			ai_system.handle_unit_command(entity, cmd.command_type, cmd.position if cmd.command_type == "move" else cmd.target_id)
+	if ai_system:
+		ai_system.handle_unit_command(unit, cmd.command_type, cmd.position if cmd.command_type == "move" else cmd.target_id)

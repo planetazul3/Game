@@ -18,8 +18,8 @@ func tick(_delta: float) -> void:
 func handle_command(type: String, target: Variant) -> void:
 	match type:
 		"move":
-			fsm.change_state("Move", {"target_position": target})
+			fsm.change_state("move", {"target_position": target})
 		"attack":
-			fsm.change_state("Attack", {"target_entity": target})
+			fsm.change_state("combat", {"target_entity": target})
 		"harvest":
-			fsm.change_state("Harvest", {"target_resource": target})
+			fsm.change_state("harvest", {"target_resource": target})

@@ -41,16 +41,21 @@ func _apply_definition() -> void:
 
 func _setup_fsm() -> void:
 	var fsm = AIStateMachine.new(self)
-	fsm.add_state("Idle", IdleState.new(self, fsm))
-	fsm.add_state("Move", MoveState.new(self, fsm))
-	fsm.add_state("Attack", AttackState.new(self, fsm))
+	var idle = load("res://scripts/ai/states/idle_state.gd").new(self, fsm)
+	var move = load("res://scripts/ai/states/move_state.gd").new(self, fsm)
+	var attack = load("res://scripts/ai/states/attack_state.gd").new(self, fsm)
+	
+	fsm.add_state("idle", idle)
+	fsm.add_state("move", move)
+	fsm.add_state("attack", attack)
 	fsm.add_state("Harvest", HarvestState.new(self, fsm))
 	fsm.add_state("Dead", DeadState.new(self, fsm))
 	
-	fsm.change_state("Idle")
+	fsm.change_state("idle")
 	ai_component.state_machine = fsm
 
 func _ready() -> void:
+	add_to_group("units")
 	if EventBus:
 		EventBus.safe_connect("unit_died", _on_unit_died)
 	
@@ -63,6 +68,16 @@ func _ready() -> void:
 		mesh_instance.mesh = capsule
 		mesh_instance.position.y = 1.0
 		add_child(mesh_instance)
+
+func select() -> void:
+	var circle = get_node_or_null("SelectionCircle")
+	if circle:
+		circle.visible = true
+
+func deselect() -> void:
+	var circle = get_node_or_null("SelectionCircle")
+	if circle:
+		circle.visible = false
 
 func _on_unit_died(unit: Node) -> void:
 	if unit == self:

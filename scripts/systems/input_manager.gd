@@ -45,14 +45,23 @@ func _input(event: InputEvent) -> void:
 					world_position = intersection
 
 			# Enqueue command into SimulationManager's buffer
-			var sim_manager = get_tree().root.find_child("SimulationManager", true, false)
-			if sim_manager and sim_manager is SimulationManager:
-				# LOCKSTEP: Use input delay (e.g., 2 ticks) to ensure all clients receive command in time
+			var sim_manager = get_tree().root.get_node_or_null("Main/Systems/SimulationManager")
+			var selection_system = get_tree().root.get_node_or_null("Main/Systems/SelectionSystem")
+			
+			if sim_manager and selection_system:
+				var selected_ids = selection_system.get_selected_unit_ids()
+				if selected_ids.is_empty():
+					return
+					
 				var latency_ticks = 2
 				var target_tick = sim_manager.current_tick + latency_ticks
-				var issuer_id = 0 # Default player ID
-				var cmd = CommandBuffer.Command.new(target_tick, issuer_id, 0, "move", world_position)
-				sim_manager.command_buffer.enqueue_command(cmd)
+				var issuer_id = FactionRegistry.get_player_faction_id()
+				
+				for unit_id in selected_ids:
+					var cmd = CommandBuffer.Command.new(target_tick, issuer_id, unit_id, "move", world_position)
+					sim_manager.command_buffer.enqueue_command(cmd)
+				
+				print("InputManager: Issued move commands for ", selected_ids.size(), " units to ", world_position)
 
 
 	if event is InputEventMouseMotion:
