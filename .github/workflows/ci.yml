@@ -63,6 +63,13 @@ jobs:
           --editor \
           --quit
 
+      - name: Validate GDScript Parsing
+        run: |
+          godot \
+          --headless \
+          --path . \
+          --check-only
+
       - name: Validate Project
         run: |
           godot \
