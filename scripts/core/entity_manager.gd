@@ -43,6 +43,15 @@ func unregister_entity_from_cache(entity_id: int) -> void:
 func get_entities_with_component(component_name: String) -> Array:
 	return _component_cache.get(component_name, [])
 
+func get_nodes_with_component(component_name: String) -> Array[Node]:
+	var ids = _component_cache.get(component_name, [])
+	var nodes: Array[Node] = []
+	for id in ids:
+		var node = _entities.get(id)
+		if is_instance_valid(node):
+			nodes.append(node)
+	return nodes
+
 func destroy_entity(entity: Node) -> void:
 	if not is_instance_valid(entity): return
 
