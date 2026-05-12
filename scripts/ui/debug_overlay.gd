@@ -42,29 +42,24 @@ func _process(delta: float) -> void:
 	if sim_sys:
 		tick_label.text = "Tick: " + str(sim_sys.current_tick)
 
-	unit_label.text = "Units: " + str(get_tree().get_nodes_in_group("selectable").size())
+	unit_label.text = "Units: " + str(EntityManager._entities.size())
 
 	var sel_sys = get_tree().current_scene.get_node_or_null("Systems/SelectionSystem")
 	if sel_sys:
 		selected_label.text = "Selected: " + str(sel_sys.selected_units.size())
 
-	var ai_sys = get_tree().current_scene.get_node_or_null("Systems/AISystem")
-	if ai_sys:
-		ai_label.text = "AI Agents: " + str(ai_sys.ai_units.size())
+	ai_label.text = "AI Agents: " + str(ComponentRegistry.get_components_by_type("AIComponent").size())
 
 	var mov_sys = get_tree().current_scene.get_node_or_null("Systems/MovementSystem")
 	if mov_sys:
 		path_req_label.text = "Path Reqs: " + str(mov_sys.entities_to_move.size())
 
-	var com_sys = get_tree().current_scene.get_node_or_null("Systems/CombatSystem")
-	if com_sys:
-		# Very naive engagement proxy for UI
-		var engagements = 0
-		for u in get_tree().get_nodes_in_group("selectable"):
-			var p = u.get_parent()
-			if is_instance_valid(p) and p.has_node("CombatComponent") and p.get_node("CombatComponent").target != null:
-				engagements += 1
-		combat_label.text = "Engagements: " + str(engagements)
+	var combat_components = ComponentRegistry.get_components_by_type("CombatComponent")
+	var engagements = 0
+	for comp in combat_components:
+		if comp.target != null:
+			engagements += 1
+	combat_label.text = "Engagements: " + str(engagements)
 
 	var vis_sys = get_tree().current_scene.get_node_or_null("Systems/VisibilitySystem")
 	if vis_sys:

@@ -2,7 +2,6 @@ extends Node
 
 var _next_entity_id: int = 1
 var _entities: Dictionary = {}
-var _component_cache: Dictionary = {}
 
 func register_entity(instance: Node) -> int:
 	# Assign ID for deterministic serialization
@@ -18,33 +17,33 @@ func register_entity(instance: Node) -> int:
 	return entity_id
 
 func _register_instance_components(entity_id: int, instance: Node) -> void:
-	if "health_component" in instance: register_component(entity_id, "HealthComponent")
-	if "movement_component" in instance: register_component(entity_id, "MovementComponent")
-	if "combat_component" in instance: register_component(entity_id, "CombatComponent")
-	if "visibility_component" in instance: register_component(entity_id, "VisibilityComponent")
-	if "gatherer_component" in instance: register_component(entity_id, "GathererComponent")
-	if "ai_component" in instance: register_component(entity_id, "AIComponent")
-
-func register_component(entity_id: int, component_name: String) -> void:
-	if not _component_cache.has(component_name):
-		_component_cache[component_name] = []
-	if entity_id not in _component_cache[component_name]:
-		_component_cache[component_name].append(entity_id)
+	var components = ["health_component", "movement_component", "combat_component", "visibility_component", "gatherer_component", "ai_component"]
+	for comp_name in components:
+		if comp_name in instance:
+			var component = instance.get(comp_name)
+			if component is RefCounted:
+				# Convert snake_case to PascalCase for the registry
+				var registry_name = comp_name.to_camel_case().capitalize().replace(" ", "")
+				ComponentRegistry.register_component(entity_id, registry_name, component)
 
 func unregister_entity_from_cache(entity_id: int) -> void:
-	for component_name in _component_cache:
-		var list: Array = _component_cache[component_name]
-		if entity_id in list:
-			list.erase(entity_id)
+	ComponentRegistry.remove_all_components(entity_id)
 
 func get_entities_with_component(component_name: String) -> Array:
-	return _component_cache.get(component_name, [])
+	# Return IDs for backward compatibility if needed, but registry returns components
+	# Systems will be refactored to use ComponentRegistry directly
+	var components = ComponentRegistry.get_components_by_type(component_name)
+	var ids = []
+	for comp in components:
+		ids.append(ComponentRegistry.get_owner_id(comp))
+	return ids
 
 func get_nodes_with_component(component_name: String) -> Array[Node]:
-	var ids = _component_cache.get(component_name, [])
+	var components = ComponentRegistry.get_components_by_type(component_name)
 	var nodes: Array[Node] = []
-	for id in ids:
-		var node = _entities.get(id)
+	for comp in components:
+		var entity_id = ComponentRegistry.get_owner_id(comp)
+		var node = _entities.get(entity_id)
 		if is_instance_valid(node):
 			nodes.append(node)
 	return nodes
