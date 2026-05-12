@@ -1,13 +1,16 @@
-class_name UnitRegistry
+extends Node
 
-static var units: Array = []
+var units: Array = []
 
-static func register(unit: Node3D) -> void:
+func register(unit: Node3D) -> void:
 	if not units.has(unit):
 		units.append(unit)
+		print("Registered unit: ", unit.name, " (Total: ", units.size(), ")")
 
-static func unregister(unit: Node3D) -> void:
-	units.erase(unit)
+func unregister(unit: Node3D) -> void:
+	if units.has(unit):
+		units.erase(unit)
+		print("Unregistered unit: ", unit.name, " (Total: ", units.size(), ")")
 
-static func get_units() -> Array:
+func get_units() -> Array:
 	return units

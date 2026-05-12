@@ -16,6 +16,7 @@ config/features=PackedStringArray("4.4")
 
 [autoload]
 
+UnitRegistry="*res://scripts/unit_registry.gd"
 
 [display]
 
