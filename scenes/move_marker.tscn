@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_marker"]
+shading_mode = 0
+albedo_color = Color(0, 1, 0, 1)
+
+[sub_resource type="TorusMesh" id="TorusMesh_marker"]
+material = SubResource("StandardMaterial3D_marker")
+inner_radius = 0.4
+outer_radius = 0.5
+
+[node name="MoveMarker" type="MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+mesh = SubResource("TorusMesh_marker")
+script = SubResource("GDScript_marker")
+
+[sub_resource type="GDScript" id="GDScript_marker"]
+script/source = "extends MeshInstance3D
+
+func _ready():
+	var tween = create_tween()
+	tween.tween_property(self, \"scale\", Vector3(0.1, 0.1, 0.1), 0.3).from(Vector3(1.5, 1.5, 1.5))
+	tween.tween_callback(queue_free)
+"
