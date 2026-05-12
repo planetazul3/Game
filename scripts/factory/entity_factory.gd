@@ -28,6 +28,9 @@ func spawn_unit(definition: Resource, position: Vector3, faction_id: int) -> Nod
 	# 2. Position
 	if instance is Node3D:
 		instance.global_position = position
+		var move_comp = instance.get("movement_component")
+		if move_comp:
+			move_comp.simulation_position = position
 	
 	# 3. Register with EntityManager
 	EntityManager.register_entity(instance)

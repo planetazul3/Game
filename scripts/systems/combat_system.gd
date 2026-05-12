@@ -17,7 +17,13 @@ func tick(delta: float) -> void:
 
 		var target = combat_comp.target
 		if is_instance_valid(target) and "health_component" in target:
-			var distance = entity.global_position.distance_to(target.global_position)
+			var self_pos = entity.global_position
+			if "movement_component" in entity: self_pos = entity.movement_component.simulation_position
+			
+			var target_pos = target.global_position
+			if "movement_component" in target: target_pos = target.movement_component.simulation_position
+			
+			var distance = self_pos.distance_to(target_pos)
 			if distance <= combat_comp.attack_range:
 				if combat_comp.attack_cooldown <= 0:
 					_process_damage(entity, target, combat_comp.attack_damage)

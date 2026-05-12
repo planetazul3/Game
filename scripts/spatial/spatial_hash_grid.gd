@@ -61,7 +61,11 @@ func query_radius(position: Vector3, radius: float) -> Array[Node]:
 			if _grid.has(cell):
 				for entity in _grid[cell]:
 					if not is_instance_valid(entity): continue
-					var dist_sq = position.distance_squared_to(entity.global_position)
+					var sim_pos = entity.global_position
+					if "movement_component" in entity:
+						sim_pos = entity.movement_component.simulation_position
+						
+					var dist_sq = position.distance_squared_to(sim_pos)
 					if dist_sq <= r_sq:
 						result.append(entity)
 	

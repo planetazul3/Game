@@ -40,12 +40,17 @@ func _recalculate_visibility() -> void:
 		var currently_visible = false
 		
 		# Optimization: Only check entities that are within range of ANY player vision source
-		# In a large map, we'd query the grid for cells near the entity.
 		for source in player_vision_sources:
 			var s_vis = source.get("visibility_component") as VisibilityComponent
 			if not s_vis: continue
 			
-			var dist_sq = source.global_position.distance_squared_to(entity.global_position)
+			var source_pos = source.global_position
+			if "movement_component" in source: source_pos = source.movement_component.simulation_position
+			
+			var entity_pos = entity.global_position
+			if "movement_component" in entity: entity_pos = entity.movement_component.simulation_position
+			
+			var dist_sq = source_pos.distance_squared_to(entity_pos)
 			if dist_sq <= s_vis.vision_range * s_vis.vision_range:
 				currently_visible = true
 				break

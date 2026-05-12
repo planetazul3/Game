@@ -68,15 +68,22 @@ func _follow_path(entity: Node, move_comp: MovementComponent, delta: float) -> v
 		target_waypoint = move_comp.path[move_comp.path_index]
 		dir = pos.direction_to(target_waypoint)
 
-	if entity is CharacterBody3D:
-		var intended_vel = dir * move_comp.move_speed
-		entity.velocity = entity.velocity.lerp(intended_vel, delta * move_comp.acceleration)
-		entity.move_and_slide()
-		SpatialGrid.update_entity(entity, entity.global_position)
+	var intended_vel = dir * move_comp.move_speed
+	
+	# Deterministic Integration
+	var next_pos = TransformIntegrator.integrate(move_comp.simulation_position, intended_vel, delta)
+	
+	# Deterministic Collision (Circle)
+	var neighbors = SpatialGrid.query_radius(next_pos, 2.0)
+	next_pos = TransformIntegrator.resolve_collisions(entity, next_pos, 0.5, neighbors)
+	
+	move_comp.simulation_position = next_pos
+	entity.global_position = next_pos # Presentation sync (simplified)
+	SpatialGrid.update_entity(entity, next_pos)
 
-		if entity.velocity.length() > 0.1:
-			var look_target = entity.global_position + entity.velocity
-			entity.look_at(Vector3(look_target.x, entity.global_position.y, look_target.z), Vector3.UP)
+	if intended_vel.length() > 0.1:
+		var look_target = next_pos + intended_vel
+		entity.look_at(Vector3(look_target.x, next_pos.y, look_target.z), Vector3.UP)
 
 func _on_command_issued(units: Array[Node], command_type: String, target: Variant) -> void:
 	if command_type == "move":
