@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://scripts/navigation/flow_field_manager.gd" id="15_ffm"]
 [ext_resource type="Script" path="res://scripts/ai/influence/tactical_influence_system.gd" id="16_tis"]
 [ext_resource type="Script" path="res://scripts/abilities/ability_system.gd" id="17_abs"]
+[ext_resource type="Script" path="res://scripts/procedural/world_generator.gd" id="18_wgn"]
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_grnd"]
 size = Vector2(100, 100)
@@ -76,6 +77,11 @@ cell_size = 2.0
 
 [node name="AbilitySystem" type="Node" parent="Systems"]
 script = ExtResource("17_abs")
+
+[node name="WorldGenerator" type="Node" parent="Systems"]
+script = ExtResource("18_wgn")
+seed_value = 12345
+world_size = Vector2(1000, 1000)
 
 [node name="FogOfWarManager" type="Node" parent="Systems"]
 script = ExtResource("13_fow")
