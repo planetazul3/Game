@@ -27,6 +27,7 @@ func _register_instance_components(entity_id: int, instance: Node) -> void:
 	if "movement_component" in instance: register_component(entity_id, "MovementComponent")
 	if "combat_component" in instance: register_component(entity_id, "CombatComponent")
 	if "visibility_component" in instance: register_component(entity_id, "VisibilityComponent")
+	if "gatherer_component" in instance: register_component(entity_id, "GathererComponent")
 
 func register_component(entity_id: int, component_name: String) -> void:
 	if not _component_cache.has(component_name):
