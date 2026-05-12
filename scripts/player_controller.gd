@@ -53,16 +53,21 @@ func _select_at_position(screen_pos: Vector2) -> void:
 	var query = PhysicsRayQueryParameters3D.create(from, to)
 	var result = space_state.intersect_ray(query)
 	
-	if result and result.collider is CharacterBody3D:
-		var unit = result.collider
-		if unit.is_in_group("units") and unit.faction_id == 0:
-			unit.selected = true
-			selected_units.append(unit)
+	if result:
+		var target = result.collider
+		print("Raycast hit: ", target.name, " Class: ", target.get_class())
+		if target is CharacterBody3D:
+			if target.is_in_group("units") and target.faction_id == 0:
+				target.selected = true
+				selected_units.append(target)
+				print("Selected unit: ", target.name)
+			else:
+				print("Target is unit but faction mismatch or not in group. Faction: ", target.get("faction_id"))
 
 func _select_in_rect(rect: Rect2) -> void:
-	var units = get_tree().get_nodes_in_group("units")
+	var units = UnitRegistry.units
 	for unit in units:
-		if unit.faction_id == 0:
+		if is_instance_valid(unit) and unit.faction_id == 0:
 			var screen_pos = camera.unproject_position(unit.global_position)
 			if rect.has_point(screen_pos):
 				unit.selected = true
@@ -94,6 +99,7 @@ func _issue_move_command() -> void:
 			var is_attack_move = Input.is_key_pressed(KEY_A)
 			_spawn_move_marker(target_pos if not is_attack_move else target_pos) # Could use different color
 			
+			print("Issuing move command to ", selected_units.size(), " units to ", target_pos)
 			for unit in selected_units:
 				if is_instance_valid(unit):
 					unit.move_to(target_pos, is_attack_move)

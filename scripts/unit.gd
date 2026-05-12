@@ -29,11 +29,15 @@ func _ready() -> void:
 	target_position = global_position
 	selection_ring.visible = false
 	UnitRegistry.register(self)
+	add_to_group("units")
+	
+	print("Unit initialized: ", name, " Faction: ", faction_id)
 	
 	# Set faction color
 	_original_material = StandardMaterial3D.new()
 	_original_material.albedo_color = Color.BLUE if faction_id == 0 else Color.RED
-	mesh.material_override = _original_material
+	mesh.set_surface_override_material(0, _original_material)
+	print("Material applied to ", name, " Color: ", _original_material.albedo_color)
 	
 	if faction_id != 0:
 		var ring_mat = StandardMaterial3D.new()
@@ -105,8 +109,8 @@ func _flash_damage() -> void:
 	var flash_mat = StandardMaterial3D.new()
 	flash_mat.albedo_color = Color.WHITE
 	flash_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
-	mesh.material_override = flash_mat
-	get_tree().create_timer(0.1).timeout.connect(func(): mesh.material_override = _original_material)
+	mesh.set_surface_override_material(0, flash_mat)
+	get_tree().create_timer(0.1).timeout.connect(func(): mesh.set_surface_override_material(0, _original_material))
 	_play_sound("res://assets/sounds/hit.wav")
 
 func die() -> void:
