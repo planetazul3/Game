@@ -1,4 +1,4 @@
-extends GameContent
+extends "res://scripts/core/game_content.gd"
 class_name AbilityDefinition
 # AbilityDefinition: Data-driven template for combat abilities
 
