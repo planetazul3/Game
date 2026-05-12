@@ -8,25 +8,36 @@ uniform float explored_dimming : hint_range(0.0, 1.0) = 0.5;
 uniform vec2 map_size = vec2(100.0, 100.0);
 uniform vec2 map_offset = vec2(-50.0, -50.0);
 
+varying vec3 world_pos;
+
+void vertex() {
+	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+}
+
 void fragment() {
 	// Map world position to texture coordinates
-	vec2 uv = (vec2(VERTEX.x, VERTEX.z) - map_offset) / map_size;
+	vec2 uv = (world_pos.xz - map_offset) / map_size;
 	
 	float visibility = texture(visibility_texture, uv).r;
 	float explored = texture(exploration_texture, uv).r;
 	
-	vec4 final_color = fog_color;
+	// Visibility: 1.0 = Clear, 0.0 = Fog
+	// Explored: 1.0 = Seen before, 0.0 = Shroud
 	
-	if (visibility > 0.1) {
-		// Visible area: Fully transparent
-		discard;
-	} else if (explored > 0.1) {
-		// Explored area: Dimmed fog
-		ALBEDO = fog_color.rgb;
-		ALPHA = fog_color.a * explored_dimming;
+	vec4 col = fog_color;
+	
+	if (visibility > 0.01) {
+		// Fully visible area
+		float alpha = clamp(1.0 - visibility, 0.0, 1.0);
+		ALBEDO = col.rgb;
+		ALPHA = col.a * alpha;
+	} else if (explored > 0.01) {
+		// Explored but not visible (Grey fog)
+		ALBEDO = col.rgb;
+		ALPHA = col.a * explored_dimming;
 	} else {
-		// Unexplored area: Full fog
-		ALBEDO = fog_color.rgb;
-		ALPHA = fog_color.a;
+		// Unexplored (Shroud)
+		ALBEDO = col.rgb;
+		ALPHA = col.a;
 	}
 }
