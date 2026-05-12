@@ -16,10 +16,12 @@ var target_unit: Node3D = null
 enum State { IDLE, MOVE, ATTACK }
 var current_state: State = State.IDLE
 
-var attack_range: float = 2.0
-var attack_damage: int = 10
-var attack_cooldown: float = 1.0
+@export var attack_range: float = 8.0 # Ranged combat
+@export var attack_damage: int = 10
+@export var attack_cooldown: float = 1.0
 var attack_timer: float = 0.0
+
+var _original_material: StandardMaterial3D
 
 func _ready() -> void:
 	target_position = global_position
@@ -27,9 +29,9 @@ func _ready() -> void:
 	add_to_group("units")
 	
 	# Set faction color
-	var mat = StandardMaterial3D.new()
-	mat.albedo_color = Color.BLUE if faction_id == 0 else Color.RED
-	mesh.material_override = mat
+	_original_material = StandardMaterial3D.new()
+	_original_material.albedo_color = Color.BLUE if faction_id == 0 else Color.RED
+	mesh.material_override = _original_material
 	
 	if faction_id != 0:
 		var ring_mat = StandardMaterial3D.new()
@@ -42,7 +44,7 @@ func _physics_process(delta: float) -> void:
 		return
 
 	selection_ring.visible = selected
-	hp_bar.value = hp
+	_update_hp_bar()
 	
 	match current_state:
 		State.IDLE:
@@ -52,9 +54,18 @@ func _physics_process(delta: float) -> void:
 		State.ATTACK:
 			_process_attack(delta)
 
+func _update_hp_bar() -> void:
+	hp_bar.value = hp
+	var color = Color.GREEN
+	if hp < 40: color = Color.RED
+	elif hp < 75: color = Color.YELLOW
+	
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = color
+	hp_bar.add_theme_stylebox_override("fill", sb)
+
 func move_to(pos: Vector3) -> void:
-	# Add slight random offset to prevent perfect stacking
-	var offset = Vector3(randf_range(-0.5, 0.5), 0, randf_range(-0.5, 0.5))
+	var offset = Vector3(randf_range(-1.0, 1.0), 0, randf_range(-1.0, 1.0))
 	target_position = pos + offset
 	target_unit = null
 	current_state = State.MOVE
@@ -66,15 +77,26 @@ func attack(target: Node3D) -> void:
 
 func take_damage(amount: int) -> void:
 	hp -= amount
+	_flash_damage()
 	if hp <= 0:
 		die()
 
+func _flash_damage() -> void:
+	var flash_mat = StandardMaterial3D.new()
+	flash_mat.albedo_color = Color.WHITE
+	flash_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+	mesh.material_override = flash_mat
+	get_tree().create_timer(0.1).timeout.connect(func(): mesh.material_override = _original_material)
+
 func die() -> void:
-	# Spawn explosion or just free
+	var parts_scene = load("res://scenes/death_particles.tscn")
+	if parts_scene:
+		var parts = parts_scene.instantiate()
+		get_tree().root.add_child(parts)
+		parts.global_position = global_position
 	queue_free()
 
 func _process_idle(_delta: float) -> void:
-	# Basic AI: scan for enemies
 	var units = get_tree().get_nodes_in_group("units")
 	var nearest_enemy = null
 	var min_dist = 15.0
@@ -97,14 +119,13 @@ func _process_move(delta: float) -> void:
 	var next_path_pos: Vector3 = nav_agent.get_next_path_position()
 	var new_velocity: Vector3 = (next_path_pos - global_position).normalized() * speed
 	
-	# Separation
 	var push = _calculate_separation()
-	new_velocity += push * 3.0
+	new_velocity += push * 4.0
 	
-	velocity = velocity.lerp(new_velocity, delta * 10.0)
+	velocity = velocity.lerp(new_velocity, delta * 8.0)
 	move_and_slide()
 	
-	if velocity.length() > 0.1:
+	if velocity.length() > 0.5:
 		var look_target = global_position + velocity
 		look_at(Vector3(look_target.x, global_position.y, look_target.z), Vector3.UP)
 
@@ -115,16 +136,25 @@ func _process_attack(delta: float) -> void:
 		
 	var dist = global_position.distance_to(target_unit.global_position)
 	if dist > attack_range:
-		# Chase
 		nav_agent.set_target_position(target_unit.global_position)
 		_process_move(delta)
 	else:
-		# Attack
+		velocity = velocity.lerp(Vector3.ZERO, delta * 10.0)
+		move_and_slide()
+		
 		attack_timer -= delta
 		if attack_timer <= 0:
-			target_unit.take_damage(attack_damage)
+			_fire_projectile()
 			attack_timer = attack_cooldown
-			print("Unit ", name, " attacked ", target_unit.name)
+
+func _fire_projectile() -> void:
+	var bullet_scene = load("res://scenes/bullet.tscn")
+	if bullet_scene:
+		var bullet = bullet_scene.instantiate()
+		get_tree().root.add_child(bullet)
+		bullet.global_position = global_position + Vector3(0, 0.9, 0)
+		bullet.target = target_unit
+		bullet.damage = attack_damage
 
 func _calculate_separation() -> Vector3:
 	var push = Vector3.ZERO
@@ -132,6 +162,6 @@ func _calculate_separation() -> Vector3:
 	for other in units:
 		if other == self: continue
 		var dist = global_position.distance_to(other.global_position)
-		if dist < 1.5:
-			push += (global_position - other.global_position).normalized() * (1.5 - dist)
+		if dist < 2.0:
+			push += (global_position - other.global_position).normalized() * (2.0 - dist)
 	return push

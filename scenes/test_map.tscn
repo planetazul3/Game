@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" path="res://scenes/unit.tscn" id="1_unit_scene"]
 [ext_resource type="Script" path="res://scripts/player_controller.gd" id="2_player"]
 [ext_resource type="Script" path="res://scripts/rts_camera.gd" id="3_camera"]
+[ext_resource type="PackedScene" path="res://scenes/game_ui.tscn" id="4_ui_scene"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
 size = Vector3(100, 1, 100)
@@ -27,6 +28,8 @@ environment = SubResource("Environment_map")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 10, 0)
+
+[node name="GameUI" parent="." instance=ExtResource("4_ui_scene")]
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
 navigation_mesh = SubResource("NavigationMesh_map")
