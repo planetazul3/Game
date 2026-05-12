@@ -47,8 +47,9 @@ func _input(event: InputEvent) -> void:
 			# Enqueue command into SimulationManager's buffer
 			var sim_manager = get_tree().root.find_child("SimulationManager", true, false)
 			if sim_manager and sim_manager is SimulationManager:
-				# We issue the command for the NEXT tick to ensure it's processed after the current one
-				var target_tick = sim_manager.current_tick + 1
+				# LOCKSTEP: Use input delay (e.g., 2 ticks) to ensure all clients receive command in time
+				var latency_ticks = 2
+				var target_tick = sim_manager.current_tick + latency_ticks
 				var issuer_id = 0 # Default player ID
 				var cmd = CommandBuffer.Command.new(target_tick, issuer_id, 0, "move", world_position)
 				sim_manager.command_buffer.enqueue_command(cmd)

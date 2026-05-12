@@ -86,6 +86,12 @@ func _simulation_step(delta_fixed: float) -> void:
 			if vc.evaluate(self):
 				_on_victory_condition_met(0, "Condition Met")
 				
+	# Generate checksum every 30 ticks (1 second)
+	if current_tick % 30 == 0:
+		var checksum = generate_world_checksum()
+		# print("Tick ", current_tick, " Checksum: ", checksum)
+		EventBus.emit_signal("checksum_generated", current_tick, checksum)
+				
 	last_step_ms = (Time.get_ticks_usec() - step_start) / 1000.0
 
 func seed_simulation(simulation_seed: int) -> void:
@@ -147,3 +153,26 @@ func load_simulation(state: Dictionary) -> void:
 	for system in _ordered_systems:
 		if state.systems.has(system.name):
 			system.load_state(state.systems[system.name])
+
+func generate_world_checksum() -> String:
+	var state_string = ""
+	
+	# 1. Stable entity state
+	var all_entities = EntityManager.get_all_entities()
+	var sorted_ids = all_entities.keys()
+	sorted_ids.sort()
+	
+	for id in sorted_ids:
+		var entity = all_entities[id]
+		state_string += str(id) + ":"
+		state_string += str(entity.global_position.snapped(Vector3(0.01, 0.01, 0.01))) + "|"
+		
+		# Components state
+		var components = ComponentRegistry.get_entity_components(id)
+		if components.has("HealthComponent"):
+			state_string += "h" + str(components["HealthComponent"].current_health) + "|"
+			
+	# 2. Global simulation state
+	state_string += "t" + str(current_tick)
+	
+	return state_string.sha256_text()
