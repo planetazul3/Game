@@ -31,6 +31,7 @@ func spawn_unit(definition: Resource, position: Vector3, faction_id: int) -> Nod
 	
 	# 3. Register with EntityManager
 	EntityManager.register_entity(instance)
+	SpatialGrid.insert_entity(instance, position)
 	
 	# 4. Add to world
 	var world = get_tree().root.get_node_or_null("Main/World/Units")
@@ -46,6 +47,7 @@ func destroy_entity(entity: Node) -> void:
 	
 	# Unregister from systems first via EntityManager
 	EntityManager.destroy_entity(entity)
+	SpatialGrid.remove_entity(entity)
 	
 	# Node cleanup
 	if entity.get_parent():

@@ -52,6 +52,7 @@ func tick(delta: float) -> void:
 				# Simple collision avoidance / soft repathing proxy
 				entity.velocity = entity.velocity.lerp(intended_vel, delta * move_comp.acceleration)
 				entity.move_and_slide()
+				SpatialGrid.update_entity(entity, entity.global_position)
 
 				if entity.velocity.length() > 0.1:
 					var look_target = entity.global_position + entity.velocity
