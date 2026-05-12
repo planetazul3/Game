@@ -23,6 +23,7 @@ func _process(_delta: float) -> void:
 
 func _show_win_screen(msg: String) -> void:
 	if win_screen.visible: return
+	print("GAME ENDED: ", msg)
 	win_label.text = msg
 	win_screen.visible = true
 	get_tree().paused = true

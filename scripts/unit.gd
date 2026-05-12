@@ -37,6 +37,17 @@ func _ready() -> void:
 		var ring_mat = StandardMaterial3D.new()
 		ring_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
 		ring_mat.albedo_color = Color.RED
+		ring_mat.emission_enabled = true
+		ring_mat.emission = Color.RED
+		ring_mat.emission_energy_multiplier = 2.0
+		selection_ring.material_override = ring_mat
+	else:
+		var ring_mat = StandardMaterial3D.new()
+		ring_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+		ring_mat.albedo_color = Color.GREEN
+		ring_mat.emission_enabled = true
+		ring_mat.emission = Color.GREEN
+		ring_mat.emission_energy_multiplier = 2.0
 		selection_ring.material_override = ring_mat
 
 func _physics_process(delta: float) -> void:
@@ -87,6 +98,7 @@ func _flash_damage() -> void:
 	flash_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
 	mesh.material_override = flash_mat
 	get_tree().create_timer(0.1).timeout.connect(func(): mesh.material_override = _original_material)
+	_play_sound("res://assets/sounds/hit.wav")
 
 func die() -> void:
 	var parts_scene = load("res://scenes/death_particles.tscn")
@@ -94,12 +106,26 @@ func die() -> void:
 		var parts = parts_scene.instantiate()
 		get_tree().root.add_child(parts)
 		parts.global_position = global_position
+	_play_sound("res://assets/sounds/death.wav")
 	queue_free()
+
+func _play_sound(path: String) -> void:
+	var sfx = AudioStreamPlayer3D.new()
+	var stream = load(path)
+	if stream:
+		sfx.stream = stream
+		get_tree().root.add_child(sfx)
+		sfx.global_position = global_position
+		sfx.play()
+		sfx.finished.connect(sfx.queue_free)
+	else:
+		# Silent if file missing, but logic exists
+		pass
 
 func _process_idle(_delta: float) -> void:
 	var units = get_tree().get_nodes_in_group("units")
 	var nearest_enemy = null
-	var min_dist = 15.0
+	var min_dist = 30.0 # Increased from 15.0
 	
 	for unit in units:
 		if unit.faction_id != faction_id:
@@ -109,11 +135,13 @@ func _process_idle(_delta: float) -> void:
 				nearest_enemy = unit
 	
 	if nearest_enemy:
+		print("Unit ", name, " (Faction ", faction_id, ") spotted enemy ", nearest_enemy.name)
 		attack(nearest_enemy)
 
 func _process_move(delta: float) -> void:
 	if nav_agent.is_navigation_finished():
 		current_state = State.IDLE
+		mesh.scale = mesh.scale.lerp(Vector3.ONE, delta * 10.0) # Reset scale
 		return
 
 	var next_path_pos: Vector3 = nav_agent.get_next_path_position()
@@ -124,6 +152,12 @@ func _process_move(delta: float) -> void:
 	
 	velocity = velocity.lerp(new_velocity, delta * 8.0)
 	move_and_slide()
+	
+	# Procedural "Running" animation (Squish/Stretch)
+	var walk_cycle = sin(Time.get_ticks_msec() * 0.015) * 0.1
+	mesh.scale.y = 1.0 + walk_cycle
+	mesh.scale.x = 1.0 - walk_cycle
+	mesh.scale.z = 1.0 - walk_cycle
 	
 	if velocity.length() > 0.5:
 		var look_target = global_position + velocity
