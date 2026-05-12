@@ -14,6 +14,8 @@ signal resource_collected(resource_type: String, amount: int)
 signal combat_started(attacker: Node, target: Node)
 signal combat_ended(attacker: Node, target: Node)
 signal combat_interrupt_movement(entity_id: int, new_target_position: Vector3)
+signal selection_area_defined(start: Vector2, end: Vector2)
+
 
 
 
