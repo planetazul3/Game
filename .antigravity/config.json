@@ -13,7 +13,9 @@
       "Always use type hints in GDScript.",
       "Prefer EventBus signals over direct node references for inter-system communication.",
       "Use Vector3 for all world-space calculations.",
-      "Run 'gdlint' or Godot headless check after modifications."
+      "Enforce atomic commits and always push to origin.",
+      "Review CI status and fix any lint/build errors immediately.",
+      "Maintain a professional, complete-solution approach (anti-laziness)."
     ]
   }
 }
