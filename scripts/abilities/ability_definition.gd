@@ -1,4 +1,4 @@
-extends Resource
+extends GameContent
 class_name AbilityDefinition
 # AbilityDefinition: Data-driven template for combat abilities
 
