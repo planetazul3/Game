@@ -27,7 +27,7 @@ func _apply_visual_polish() -> void:
 	var ground = get_node_or_null("World/Ground")
 	if ground:
 		var mat = StandardMaterial3D.new()
-		var tex = load("res://assets/textures/ground_sci_fi.png")
+		var tex = load("res://assets/textures/ground_sci_fi.jpg")
 		if tex:
 			mat.albedo_texture = tex
 			mat.uv1_scale = Vector3(20, 20, 20) # Repeat texture for detail

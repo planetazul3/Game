@@ -47,7 +47,7 @@ func _ready() -> void:
 
 	var fog_material = ShaderMaterial.new()
 	fog_material.shader = load("res://shaders/fog_of_war.gdshader")
-	var noise_tex = load("res://assets/textures/fog_noise.png")
+	var noise_tex = load("res://assets/textures/fog_noise.jpg")
 	if noise_tex:
 		fog_material.set_shader_parameter("noise_texture", noise_tex)
 	
