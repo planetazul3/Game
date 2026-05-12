@@ -31,9 +31,8 @@ func simulation_tick(delta: float) -> void:
 					move_comp.target_position = target.global_position
 					move_comp.has_target = true
 
-					var move_sys = get_parent().get_node_or_null("MovementSystem")
-					if move_sys and entity not in move_sys.entities_to_move:
-						move_sys.entities_to_move.append(entity)
+					EventBus.combat_interrupt_movement.emit(entity.get_instance_id(), target.global_position)
+
 		else:
 			combat_comp.target = null
 

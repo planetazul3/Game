@@ -13,6 +13,9 @@ signal unit_died(unit: Node)
 signal resource_collected(resource_type: String, amount: int)
 signal combat_started(attacker: Node, target: Node)
 signal combat_ended(attacker: Node, target: Node)
+signal combat_interrupt_movement(entity_id: int, new_target_position: Vector3)
+
+
 
 signal visibility_changed(unit: Node, is_visible: bool)
 
