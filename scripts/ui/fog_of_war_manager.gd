@@ -92,7 +92,21 @@ func _get_sprite_from_pool() -> Sprite2D:
 		return _sprite_pool.pop_back()
 	
 	var sprite = Sprite2D.new()
-	sprite.texture = load("res://assets/ui/fog_circle.png")
+	
+	# Create a radial gradient for vision
+	var gradient = Gradient.new()
+	gradient.offsets = [0.0, 1.0]
+	gradient.colors = [Color.WHITE, Color(1, 1, 1, 0)]
+	
+	var texture = GradientTexture2D.new()
+	texture.gradient = gradient
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(0.5, 0.0)
+	texture.width = 128
+	texture.height = 128
+	
+	sprite.texture = texture
 	sprite.modulate = Color.WHITE
 	visibility_viewport.add_child(sprite)
 	

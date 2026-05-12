@@ -4,10 +4,12 @@ class_name Unit
 var health_component: HealthComponent
 var visibility_component: VisibilityComponent
 var movement_component: MovementComponent
+var combat_component: CombatComponent
 var gatherer_component: GathererComponent
 var ai_component: AIComponent
 
 @export var definition: UnitDefinition
+var faction_id: int = 0
 
 func _init(p_definition: UnitDefinition = null) -> void:
 	if p_definition:
@@ -51,6 +53,16 @@ func _setup_fsm() -> void:
 func _ready() -> void:
 	if EventBus:
 		EventBus.safe_connect("unit_died", _on_unit_died)
+	
+	# Add placeholder mesh if none exists
+	if get_child_count() == 0:
+		var mesh_instance = MeshInstance3D.new()
+		var capsule = CapsuleMesh.new()
+		capsule.radius = 0.5
+		capsule.height = 2.0
+		mesh_instance.mesh = capsule
+		mesh_instance.position.y = 1.0
+		add_child(mesh_instance)
 
 func _on_unit_died(unit: Node) -> void:
 	if unit == self:

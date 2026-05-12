@@ -16,7 +16,14 @@ func spawn_unit(definition: Resource, position: Vector3, faction_id: int) -> Nod
 		var unit_script = load("res://scripts/units/unit.gd")
 		instance = unit_script.new()
 	
-	# 1. Assign Definition and Faction
+	# 1. Add to world first
+	var world = get_tree().root.get_node_or_null("Main/World/Units")
+	if world:
+		world.add_child(instance)
+	else:
+		get_tree().root.add_child(instance)
+
+	# 2. Assign Definition and Faction
 	if instance.has_method("set_definition"):
 		instance.set_definition(definition)
 	else:
@@ -24,24 +31,20 @@ func spawn_unit(definition: Resource, position: Vector3, faction_id: int) -> Nod
 	
 	if "faction_id" in instance:
 		instance.set("faction_id", faction_id)
+		var sim_mgr = get_node_or_null("/root/Main/Systems/SimulationManager")
+		if sim_mgr:
+			sim_mgr.register_faction(faction_id)
 	
-	# 2. Position
+	# 3. Position (Safe now because inside tree)
 	if instance is Node3D:
 		instance.global_position = position
 		var move_comp = instance.get("movement_component")
 		if move_comp:
 			move_comp.simulation_position = position
 	
-	# 3. Register with EntityManager
+	# 4. Register with Systems
 	EntityManager.register_entity(instance)
 	SpatialGrid.insert_entity(instance, position)
-	
-	# 4. Add to world
-	var world = get_tree().root.get_node_or_null("Main/World/Units")
-	if world:
-		world.add_child(instance)
-	else:
-		get_tree().root.add_child(instance)
 	
 	return instance
 

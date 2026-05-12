@@ -166,6 +166,11 @@ func load_simulation(state: Dictionary) -> void:
 		if state.systems.has(system.name):
 			system.load_state(state.systems[system.name])
 
+func register_faction(faction_id: int) -> void:
+	if faction_id not in active_factions:
+		active_factions.append(faction_id)
+		print("SimulationManager: Registered active faction: ", faction_id)
+
 func generate_world_checksum() -> String:
 	var state_string = ""
 	
