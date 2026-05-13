@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=10 format=3]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bullet"]
 shading_mode = 0
@@ -9,27 +9,27 @@ material = SubResource("StandardMaterial3D_bullet")
 radius = 0.1
 height = 0.2
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_bullet"]
-radius = 0.1
-
 [sub_resource type="GDScript" id="GDScript_bullet"]
 script/source = "extends Node3D
 
 var target: Node3D = null
-var speed: float = 20.0
 var damage: int = 10
+var speed: float = 20.0
+var source_unit: Node3D = null
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float):
 	if not is_instance_valid(target):
 		queue_free()
 		return
 		
-	var dir = (target.global_position + Vector3(0, 0.9, 0) - global_position).normalized()
+	var target_center = target.global_position + Vector3(0, 0.9, 0)
+	var dir = (target_center - global_position).normalized()
 	global_position += dir * speed * delta
 	
-	if global_position.distance_to(target.global_position + Vector3(0, 0.9, 0)) < 0.5:
+	if global_position.distance_to(target_center) < 0.5:
 		if target.has_method(\"take_damage\"):
-			target.take_damage(damage)
+			var src_pos = source_unit.global_position if is_instance_valid(source_unit) else global_position
+			target.take_damage(damage, src_pos)
 		queue_free()
 "
 
@@ -45,6 +45,9 @@ height = 0.1
 [sub_resource type="Curve" id="Curve_trail"]
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), -1.0, 0.0, 0, 0]
 point_count = 2
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_bullet"]
+radius = 0.2
 
 [node name="Bullet" type="Node3D"]
 script = SubResource("GDScript_bullet")

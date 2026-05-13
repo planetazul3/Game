@@ -38,7 +38,7 @@ func _perform_selection() -> void:
 	if not Input.is_key_pressed(KEY_SHIFT):
 		for unit in selected_units:
 			if is_instance_valid(unit):
-				unit.selected = false
+				unit.on_deselected()
 		selected_units.clear()
 	
 	if single_click:
@@ -55,14 +55,10 @@ func _select_at_position(screen_pos: Vector2) -> void:
 	
 	if result:
 		var target = result.collider
-		print("Raycast hit: ", target.name, " Class: ", target.get_class())
 		if target is CharacterBody3D:
 			if target.is_in_group("units") and target.faction_id == 0:
-				target.selected = true
+				target.on_selected()
 				selected_units.append(target)
-				print("Selected unit: ", target.name)
-			else:
-				print("Target is unit but faction mismatch or not in group. Faction: ", target.get("faction_id"))
 
 func _select_in_rect(rect: Rect2) -> void:
 	var units = UnitRegistry.units
@@ -70,7 +66,7 @@ func _select_in_rect(rect: Rect2) -> void:
 		if is_instance_valid(unit) and unit.faction_id == 0:
 			var screen_pos = camera.unproject_position(unit.global_position)
 			if rect.has_point(screen_pos):
-				unit.selected = true
+				unit.on_selected()
 				if unit not in selected_units:
 					selected_units.append(unit)
 
@@ -97,9 +93,7 @@ func _issue_move_command() -> void:
 			var target_pos = result.position
 			
 			var is_attack_move = Input.is_key_pressed(KEY_A)
-			_spawn_move_marker(target_pos if not is_attack_move else target_pos) # Could use different color
-			
-			print("Issuing move command to ", selected_units.size(), " units to ", target_pos)
+			_spawn_move_marker(target_pos) 
 			for unit in selected_units:
 				if is_instance_valid(unit):
 					unit.move_to(target_pos, is_attack_move)

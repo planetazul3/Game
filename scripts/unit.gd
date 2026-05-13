@@ -31,13 +31,12 @@ func _ready() -> void:
 	UnitRegistry.register(self)
 	add_to_group("units")
 	
-	print("Unit initialized: ", name, " Faction: ", faction_id)
+	nav_agent.velocity_computed.connect(_on_velocity_computed)
 	
 	# Set faction color
 	_original_material = StandardMaterial3D.new()
 	_original_material.albedo_color = Color.BLUE if faction_id == 0 else Color.RED
 	mesh.set_surface_override_material(0, _original_material)
-	print("Material applied to ", name, " Color: ", _original_material.albedo_color)
 	
 	if faction_id != 0:
 		var ring_mat = StandardMaterial3D.new()
@@ -59,12 +58,14 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	UnitRegistry.unregister(self)
 
+var last_damage_time: float = -10.0
+
 func _physics_process(delta: float) -> void:
 	if hp <= 0:
 		return
 
 	selection_ring.visible = selected
-	_update_hp_bar()
+	_update_hp_bar(delta)
 	
 	match current_state:
 		State.IDLE:
@@ -74,7 +75,7 @@ func _physics_process(delta: float) -> void:
 		State.ATTACK:
 			_process_attack(delta)
 
-func _update_hp_bar() -> void:
+func _update_hp_bar(delta: float) -> void:
 	hp_bar.value = hp
 	var color = Color.GREEN
 	if hp < 40: color = Color.RED
@@ -83,11 +84,15 @@ func _update_hp_bar() -> void:
 	var sb = StyleBoxFlat.new()
 	sb.bg_color = color
 	hp_bar.add_theme_stylebox_override("fill", sb)
+	
+	# Smart HP bar: show if selected OR damaged recently
+	var should_show = selected or (Time.get_ticks_msec() / 1000.0 - last_damage_time < 3.0)
+	hp_bar.get_parent().get_parent().visible = should_show # Sprite3D parent
 
 var is_attack_moving: bool = false
 
 func move_to(pos: Vector3, attack_move: bool = false) -> void:
-	var offset = Vector3(randf_range(-1.0, 1.0), 0, randf_range(-1.0, 1.0))
+	var offset = Vector3(randf_range(-1.5, 1.5), 0, randf_range(-1.5, 1.5))
 	target_position = pos + offset
 	target_unit = null
 	is_attack_moving = attack_move
@@ -99,11 +104,23 @@ func attack(target: Node3D) -> void:
 	is_attack_moving = false
 	current_state = State.ATTACK
 
-func take_damage(amount: int) -> void:
+func take_damage(amount: int, source_pos: Vector3 = Vector3.ZERO) -> void:
 	hp -= amount
+	last_damage_time = Time.get_ticks_msec() / 1000.0
 	_flash_damage()
+	
+	# Hit Knockback / Micro-stun
+	if source_pos != Vector3.ZERO:
+		var dir = (global_position - source_pos).normalized()
+		velocity += dir * 5.0
+		# Interrupt current state briefly
+		_kick_scale(Vector3(1.2, 0.7, 1.2))
+	
 	if hp <= 0:
 		die()
+
+func _kick_scale(s: Vector3) -> void:
+	mesh.scale = s
 
 func _flash_damage() -> void:
 	var flash_mat = StandardMaterial3D.new()
@@ -135,10 +152,13 @@ func _play_sound(path: String) -> void:
 		sfx.play()
 		sfx.finished.connect(sfx.queue_free)
 
-func _process_idle(_delta: float) -> void:
+func _process_idle(delta: float) -> void:
+	# Idle breathe
+	mesh.scale = mesh.scale.lerp(Vector3.ONE, delta * 5.0)
+	
 	var units = UnitRegistry.units
 	var nearest_enemy = null
-	var min_dist = 30.0
+	var min_dist = 25.0
 	
 	for unit in units:
 		if is_instance_valid(unit) and unit.faction_id != faction_id:
@@ -152,7 +172,6 @@ func _process_idle(_delta: float) -> void:
 
 func _process_move(delta: float) -> void:
 	if is_attack_moving:
-		# Scan for enemies while moving
 		var units = UnitRegistry.units
 		for unit in units:
 			if is_instance_valid(unit) and unit.faction_id != faction_id and global_position.distance_to(unit.global_position) < 15.0:
@@ -161,18 +180,16 @@ func _process_move(delta: float) -> void:
 
 	if nav_agent.is_navigation_finished():
 		current_state = State.IDLE
-		mesh.scale = mesh.scale.lerp(Vector3.ONE, delta * 15.0)
+		nav_agent.set_velocity(Vector3.ZERO)
 		return
 
 	var next_path_pos: Vector3 = nav_agent.get_next_path_position()
 	var new_velocity: Vector3 = (next_path_pos - global_position).normalized() * speed
 	
 	var push = _calculate_separation()
-	new_velocity += push * 4.0
+	new_velocity += push * 5.0
 	
-	# Mass-based acceleration
-	velocity = velocity.lerp(new_velocity, delta * 6.0) 
-	move_and_slide()
+	nav_agent.set_velocity(new_velocity)
 	
 	# Procedural walk animation
 	var walk_cycle = sin(Time.get_ticks_msec() * 0.015) * 0.1
@@ -182,6 +199,11 @@ func _process_move(delta: float) -> void:
 	
 	if velocity.length() > 0.5:
 		_smooth_look_at(global_position + velocity, delta)
+
+func _on_velocity_computed(safe_velocity: Vector3) -> void:
+	# Mass-based lerp
+	velocity = velocity.lerp(safe_velocity, 0.15) 
+	move_and_slide()
 
 func _process_attack(delta: float) -> void:
 	if not is_instance_valid(target_unit) or target_unit.hp <= 0:
@@ -193,24 +215,22 @@ func _process_attack(delta: float) -> void:
 		nav_agent.set_target_position(target_unit.global_position)
 		_process_move(delta)
 	else:
-		# Decelerate to stop
-		velocity = velocity.lerp(Vector3.ZERO, delta * 15.0)
+		velocity = velocity.lerp(Vector3.ZERO, delta * 10.0)
 		move_and_slide()
+		nav_agent.set_velocity(Vector3.ZERO)
 		
-		# Smoothly rotate to target
 		_smooth_look_at(target_unit.global_position, delta)
 		
 		attack_timer -= delta
 		
-		# Attack Anticipation (Windup)
 		if attack_timer < 0.2 and attack_timer > 0:
-			mesh.scale = mesh.scale.lerp(Vector3(1.2, 0.8, 1.2), delta * 20.0)
+			mesh.scale = mesh.scale.lerp(Vector3(1.3, 0.7, 1.3), delta * 20.0)
 		elif attack_timer <= 0:
 			_fire_projectile()
 			attack_timer = attack_cooldown
-			mesh.scale = Vector3(0.8, 1.4, 0.8)
+			mesh.scale = Vector3(0.7, 1.5, 0.7)
 		else:
-			mesh.scale = mesh.scale.lerp(Vector3.ONE, delta * 10.0)
+			mesh.scale = mesh.scale.lerp(Vector3.ONE, delta * 5.0)
 
 func _fire_projectile() -> void:
 	var bullet_scene = load("res://scenes/bullet.tscn")
@@ -220,6 +240,7 @@ func _fire_projectile() -> void:
 		bullet.global_position = global_position + Vector3(0, 0.9, 0)
 		bullet.target = target_unit
 		bullet.damage = attack_damage
+		bullet.source_unit = self
 
 func _smooth_look_at(target_pos: Vector3, delta: float) -> void:
 	var look_target = Vector3(target_pos.x, global_position.y, target_pos.z)
@@ -234,6 +255,14 @@ func _calculate_separation() -> Vector3:
 	for other in units:
 		if not is_instance_valid(other) or other == self: continue
 		var dist = global_position.distance_to(other.global_position)
-		if dist < 2.0:
-			push += (global_position - other.global_position).normalized() * (2.0 - dist)
+		if dist < 1.8:
+			push += (global_position - other.global_position).normalized() * (1.8 - dist)
 	return push
+
+func on_selected() -> void:
+	selected = true
+	# Selection "Pop"
+	mesh.scale = Vector3(1.4, 0.6, 1.4)
+
+func on_deselected() -> void:
+	selected = false
