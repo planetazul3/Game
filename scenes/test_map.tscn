@@ -1,12 +1,18 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/unit.tscn" id="1_unit_scene"]
 [ext_resource type="Script" path="res://scripts/player_controller.gd" id="2_player"]
 [ext_resource type="Script" path="res://scripts/rts_camera.gd" id="3_camera"]
 [ext_resource type="PackedScene" path="res://scenes/game_ui.tscn" id="4_ui_scene"]
+[ext_resource type="Script" path="res://scripts/enemy_ai.gd" id="5_enemy_ai"]
 
+; --- Sky & Environment ---
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_map"]
-sky_top_color = Color(0.384314, 0.454902, 0.54902, 1)
+sky_top_color = Color(0.12, 0.15, 0.25, 1)
+sky_horizon_color = Color(0.25, 0.22, 0.35, 1)
+ground_bottom_color = Color(0.08, 0.06, 0.12, 1)
+ground_horizon_color = Color(0.2, 0.18, 0.25, 1)
+sun_angle_max = 20.0
 
 [sub_resource type="Sky" id="Sky_map"]
 sky_material = SubResource("ProceduralSkyMaterial_map")
@@ -15,43 +21,116 @@ sky_material = SubResource("ProceduralSkyMaterial_map")
 background_mode = 2
 sky = SubResource("Sky_map")
 tonemap_mode = 2
+tonemap_exposure = 1.1
 glow_enabled = true
+glow_intensity = 0.6
+glow_bloom = 0.3
+ambient_light_source = 2
+ambient_light_color = Color(0.3, 0.35, 0.5, 1)
+ambient_light_energy = 0.6
+fog_enabled = true
+fog_light_color = Color(0.15, 0.18, 0.3, 1)
+fog_density = 0.005
+fog_sky_affect = 0.3
+
+; --- Floor ---
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.15, 0.18, 0.22, 1)
+roughness = 0.85
+metallic = 0.05
 
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
-size = Vector3(100, 1, 100)
+material = SubResource("StandardMaterial3D_floor")
+size = Vector3(80, 1, 80)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
-size = Vector3(100, 1, 100)
+size = Vector3(80, 1, 80)
 
+; --- Navigation ---
 [sub_resource type="NavigationMesh" id="NavigationMesh_map"]
-vertices = PackedVector3Array(-50, 0.5, -50, -50, 0.5, 50, 50, 0.5, 50, 50, 0.5, -50)
+vertices = PackedVector3Array(-40, 0.5, -40, -40, 0.5, 40, 40, 0.5, 40, 40, 0.5, -40)
 polygons = [PackedInt32Array(3, 2, 0), PackedInt32Array(0, 2, 1)]
 
-[sub_resource type="Environment" id="Environment_map"]
-background_mode = 1
-background_color = Color(0.1, 0.1, 0.15, 1)
-ambient_light_source = 2
-ambient_light_color = Color(0.5, 0.5, 0.5, 1)
+; --- Obstacle Materials ---
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rock"]
+albedo_color = Color(0.22, 0.2, 0.25, 1)
+roughness = 0.9
+metallic = 0.1
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_barrier"]
+albedo_color = Color(0.12, 0.15, 0.2, 1)
+roughness = 0.6
+metallic = 0.3
+emission_enabled = true
+emission = Color(0.1, 0.2, 0.4, 1)
+emission_energy_multiplier = 0.3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_crate"]
+albedo_color = Color(0.3, 0.25, 0.18, 1)
+roughness = 0.8
+metallic = 0.1
+
+; --- Obstacle Meshes ---
+[sub_resource type="BoxMesh" id="BoxMesh_wall_long"]
+material = SubResource("StandardMaterial3D_barrier")
+size = Vector3(10, 2, 1.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_long"]
+size = Vector3(10, 2, 1.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_short"]
+material = SubResource("StandardMaterial3D_barrier")
+size = Vector3(1.5, 2, 6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_short"]
+size = Vector3(1.5, 2, 6)
+
+[sub_resource type="BoxMesh" id="BoxMesh_crate"]
+material = SubResource("StandardMaterial3D_crate")
+size = Vector3(1.5, 1.5, 1.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_crate"]
+size = Vector3(1.5, 1.5, 1.5)
+
+; --- Grid line material ---
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_grid"]
+albedo_color = Color(0.2, 0.25, 0.35, 0.15)
+transparency = 1
+shading_mode = 0
+
+; =====================
+; SCENE TREE
+; =====================
 
 [node name="TestMap" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_map")
 
+; --- Main Light (warm sun from side) ---
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 10, 0)
+transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 10, 15, 5)
+light_color = Color(1, 0.9, 0.75, 1)
+light_energy = 1.2
 shadow_enabled = true
-shadow_bias = 0.04
-shadow_blur = 1.5
+shadow_bias = 0.03
+shadow_blur = 2.0
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_map")
+; --- Fill Light (cool blue from opposite) ---
+[node name="FillLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0.433013, -0.25, 0, 0.5, 0.866025, 0.5, -0.75, 0.433013, -10, 12, -5)
+light_color = Color(0.6, 0.7, 1.0, 1)
+light_energy = 0.3
+shadow_enabled = false
 
+; --- UI ---
 [node name="GameUI" parent="." instance=ExtResource("4_ui_scene")]
 
+; --- Navigation Region ---
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
 navigation_mesh = SubResource("NavigationMesh_map")
 
+; --- Ground ---
 [node name="Floor" type="StaticBody3D" parent="NavigationRegion3D"]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Floor"]
@@ -60,7 +139,102 @@ mesh = SubResource("BoxMesh_floor")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Floor"]
 shape = SubResource("BoxShape3D_floor")
 
-[node name="PlayerController" type="Node3D" parent="."]
+; =====================
+; OBSTACLES / COVER
+; =====================
+
+; --- Central Wall (creates two attack lanes) ---
+[node name="CenterWall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="CenterWall"]
+mesh = SubResource("BoxMesh_wall_long")
+
+[node name="Collision" type="CollisionShape3D" parent="CenterWall"]
+shape = SubResource("BoxShape3D_wall_long")
+
+; --- North flank wall ---
+[node name="NorthWall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 1.5, -12)
+
+[node name="Mesh" type="MeshInstance3D" parent="NorthWall"]
+mesh = SubResource("BoxMesh_wall_short")
+
+[node name="Collision" type="CollisionShape3D" parent="NorthWall"]
+shape = SubResource("BoxShape3D_wall_short")
+
+; --- South flank wall ---
+[node name="SouthWall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1.5, 12)
+
+[node name="Mesh" type="MeshInstance3D" parent="SouthWall"]
+mesh = SubResource("BoxMesh_wall_short")
+
+[node name="Collision" type="CollisionShape3D" parent="SouthWall"]
+shape = SubResource("BoxShape3D_wall_short")
+
+; --- Cover crates near player start ---
+[node name="Crate1" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.25, 4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Crate1"]
+mesh = SubResource("BoxMesh_crate")
+
+[node name="Collision" type="CollisionShape3D" parent="Crate1"]
+shape = SubResource("BoxShape3D_crate")
+
+[node name="Crate2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1.25, -4)
+
+[node name="Mesh" type="MeshInstance3D" parent="Crate2"]
+mesh = SubResource("BoxMesh_crate")
+
+[node name="Collision" type="CollisionShape3D" parent="Crate2"]
+shape = SubResource("BoxShape3D_crate")
+
+; --- Cover crates near enemy ---
+[node name="Crate3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 1.25, 5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Crate3"]
+mesh = SubResource("BoxMesh_crate")
+
+[node name="Collision" type="CollisionShape3D" parent="Crate3"]
+shape = SubResource("BoxShape3D_crate")
+
+[node name="Crate4" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 1.25, -5)
+
+[node name="Mesh" type="MeshInstance3D" parent="Crate4"]
+mesh = SubResource("BoxMesh_crate")
+
+[node name="Collision" type="CollisionShape3D" parent="Crate4"]
+shape = SubResource("BoxShape3D_crate")
+
+; --- Scattered rocks/debris ---
+[node name="Crate5" type="StaticBody3D" parent="."]
+transform = Transform3D(0.707, 0, 0.707, 0, 1, 0, -0.707, 0, 0.707, -6, 1.25, -8)
+
+[node name="Mesh" type="MeshInstance3D" parent="Crate5"]
+mesh = SubResource("BoxMesh_crate")
+
+[node name="Collision" type="CollisionShape3D" parent="Crate5"]
+shape = SubResource("BoxShape3D_crate")
+
+[node name="Crate6" type="StaticBody3D" parent="."]
+transform = Transform3D(0.707, 0, -0.707, 0, 1, 0, 0.707, 0, 0.707, 8, 1.25, 9)
+
+[node name="Mesh" type="MeshInstance3D" parent="Crate6"]
+mesh = SubResource("BoxMesh_crate")
+
+[node name="Collision" type="CollisionShape3D" parent="Crate6"]
+shape = SubResource("BoxShape3D_crate")
+
+; =====================
+; PLAYER CONTROLLER
+; =====================
+[node name="PlayerController" type="Node3D" parent="." groups=["player_controller"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 0, 0)
 script = ExtResource("2_player")
 
 [node name="Camera3D" type="Camera3D" parent="PlayerController"]
@@ -73,36 +247,66 @@ script = ExtResource("3_camera")
 visible = false
 offset_right = 40.0
 offset_bottom = 40.0
-color = Color(0.3, 1, 0.3, 0.3)
+color = Color(0.2, 0.8, 1.0, 0.2)
 
+; =====================
+; PLAYER UNITS (Left side - formation)
+; =====================
 [node name="PlayerUnits" type="Node3D" parent="."]
 
 [node name="Unit1" parent="PlayerUnits" instance=ExtResource("1_unit_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0.5, -3)
 
 [node name="Unit2" parent="PlayerUnits" instance=ExtResource("1_unit_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.5, 2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0.5, 0)
 
 [node name="Unit3" parent="PlayerUnits" instance=ExtResource("1_unit_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.5, -2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 0.5, 3)
 
 [node name="Unit4" parent="PlayerUnits" instance=ExtResource("1_unit_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0.5, -1.5)
 
+[node name="Unit5" parent="PlayerUnits" instance=ExtResource("1_unit_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0.5, 1.5)
+
+[node name="Unit6" parent="PlayerUnits" instance=ExtResource("1_unit_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 0.5, 0)
+
+; =====================
+; ENEMY UNITS (Right side - defensive positions)
+; =====================
 [node name="EnemyUnits" type="Node3D" parent="."]
+script = ExtResource("5_enemy_ai")
 
+; --- Front guard ---
 [node name="Enemy1" parent="EnemyUnits" instance=ExtResource("1_unit_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.5, -6)
 faction_id = 1
 
 [node name="Enemy2" parent="EnemyUnits" instance=ExtResource("1_unit_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.5, 2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.5, 6)
 faction_id = 1
 
+; --- Mid defenders ---
 [node name="Enemy3" parent="EnemyUnits" instance=ExtResource("1_unit_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0.5, -2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0.5, -2)
 faction_id = 1
 
 [node name="Enemy4" parent="EnemyUnits" instance=ExtResource("1_unit_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 15, 0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0.5, 2)
 faction_id = 1
+
+; --- Rear snipers ---
+[node name="Enemy5" parent="EnemyUnits" instance=ExtResource("1_unit_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 0.5, 0)
+faction_id = 1
+attack_range = 12.0
+attack_damage = 15
+hp = 60
+
+[node name="Enemy6" parent="EnemyUnits" instance=ExtResource("1_unit_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0.5, -4)
+faction_id = 1
+attack_range = 12.0
+attack_damage = 15
+hp = 60

@@ -1,6 +1,7 @@
 extends CharacterBody3D
 
 @export var hp: int = 100
+@export var max_hp: int = 100
 @export var speed: float = 5.0
 @export var faction_id: int = 0 # 0 = player, 1 = enemy
 
@@ -12,57 +13,100 @@ var target_unit: Node3D = null
 @onready var selection_ring: MeshInstance3D = $SelectionRing
 @onready var hp_bar: ProgressBar = $SubViewport/ProgressBar
 @onready var mesh: MeshInstance3D = $MeshInstance3D
+@onready var hp_sprite: Sprite3D = $Sprite3D
 
 enum State { IDLE, MOVE, ATTACK }
 var current_state: State = State.IDLE
 
-@export var attack_range: float = 8.0 # Ranged combat
+@export var attack_range: float = 8.0
 @export var attack_damage: int = 10
 @export var attack_cooldown: float = 1.0
 var attack_timer: float = 0.0
+var hp_fill_stylebox: StyleBoxFlat
+var hp_bg_stylebox: StyleBoxFlat
 
 var _original_material: StandardMaterial3D
 
 @export var turn_speed: float = 10.0
+@export var auto_aggro_range: float = 10.0 # Only auto-attack nearby enemies
+
+# Visual colors per faction
+const PLAYER_COLOR := Color(0.15, 0.45, 0.95) # Rich blue
+const PLAYER_COLOR_HIGHLIGHT := Color(0.3, 0.6, 1.0)
+const ENEMY_COLOR := Color(0.9, 0.15, 0.15) # Vivid red
+const ENEMY_COLOR_HIGHLIGHT := Color(1.0, 0.3, 0.2)
+const PLAYER_RING_COLOR := Color(0.2, 1.0, 0.4, 1.0)
+const ENEMY_RING_COLOR := Color(1.0, 0.2, 0.2, 1.0)
 
 func _ready() -> void:
 	target_position = global_position
 	selection_ring.visible = false
+	max_hp = hp
 	UnitRegistry.register(self)
 	add_to_group("units")
 	
 	nav_agent.velocity_computed.connect(_on_velocity_computed)
 	
-	# Set faction color
+	# HP bar styling
+	hp_fill_stylebox = StyleBoxFlat.new()
+	hp_bar.add_theme_stylebox_override("fill", hp_fill_stylebox)
+	hp_bg_stylebox = StyleBoxFlat.new()
+	hp_bg_stylebox.bg_color = Color(0.1, 0.1, 0.1, 0.8)
+	hp_bg_stylebox.corner_radius_top_left = 2
+	hp_bg_stylebox.corner_radius_top_right = 2
+	hp_bg_stylebox.corner_radius_bottom_left = 2
+	hp_bg_stylebox.corner_radius_bottom_right = 2
+	hp_bar.add_theme_stylebox_override("background", hp_bg_stylebox)
+	
+	# Set faction color with proper materials
 	_original_material = StandardMaterial3D.new()
-	_original_material.albedo_color = Color.BLUE if faction_id == 0 else Color.RED
+	if faction_id == 0:
+		_original_material.albedo_color = PLAYER_COLOR
+		_original_material.emission_enabled = true
+		_original_material.emission = PLAYER_COLOR * 0.3
+		_original_material.emission_energy_multiplier = 0.5
+	else:
+		_original_material.albedo_color = ENEMY_COLOR
+		_original_material.emission_enabled = true
+		_original_material.emission = ENEMY_COLOR * 0.3
+		_original_material.emission_energy_multiplier = 0.5
+	
+	_original_material.roughness = 0.3
+	_original_material.metallic = 0.2
 	mesh.set_surface_override_material(0, _original_material)
 	
+	# Selection ring materials
+	var ring_mat = StandardMaterial3D.new()
+	ring_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+	ring_mat.emission_enabled = true
+	ring_mat.emission_energy_multiplier = 2.5
 	if faction_id != 0:
-		var ring_mat = StandardMaterial3D.new()
-		ring_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
-		ring_mat.albedo_color = Color.RED
-		ring_mat.emission_enabled = true
-		ring_mat.emission = Color.RED
-		ring_mat.emission_energy_multiplier = 2.0
-		selection_ring.material_override = ring_mat
+		ring_mat.albedo_color = ENEMY_RING_COLOR
+		ring_mat.emission = ENEMY_RING_COLOR
 	else:
-		var ring_mat = StandardMaterial3D.new()
-		ring_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
-		ring_mat.albedo_color = Color.GREEN
-		ring_mat.emission_enabled = true
-		ring_mat.emission = Color.GREEN
-		ring_mat.emission_energy_multiplier = 2.0
-		selection_ring.material_override = ring_mat
+		ring_mat.albedo_color = PLAYER_RING_COLOR
+		ring_mat.emission = PLAYER_RING_COLOR
+	selection_ring.material_override = ring_mat
 
 func _exit_tree() -> void:
 	UnitRegistry.unregister(self)
 
 var last_damage_time: float = -10.0
+var _nav_ready: bool = false
+var _nav_startup: float = 0.5
 
 func _physics_process(delta: float) -> void:
 	if hp <= 0:
 		return
+	
+	# Wait for NavigationServer to sync before any nav queries
+	if not _nav_ready:
+		_nav_startup -= delta
+		if _nav_startup <= 0:
+			_nav_ready = true
+		else:
+			_update_hp_bar(delta)
+			return
 
 	selection_ring.visible = selected
 	_update_hp_bar(delta)
@@ -75,25 +119,45 @@ func _physics_process(delta: float) -> void:
 		State.ATTACK:
 			_process_attack(delta)
 
-func _update_hp_bar(delta: float) -> void:
-	hp_bar.value = hp
-	var color = Color.GREEN
-	if hp < 40: color = Color.RED
-	elif hp < 75: color = Color.YELLOW
+func _update_hp_bar(_delta: float) -> void:
+	hp_bar.value = float(hp) / float(max_hp) * 100.0
 	
-	var sb = StyleBoxFlat.new()
-	sb.bg_color = color
-	hp_bar.add_theme_stylebox_override("fill", sb)
+	var hp_ratio := float(hp) / float(max_hp)
+	var color: Color
+	if hp_ratio < 0.3:
+		color = Color(0.9, 0.1, 0.1) # Red
+	elif hp_ratio < 0.6:
+		color = Color(1.0, 0.7, 0.1) # Orange-yellow
+	else:
+		color = Color(0.2, 0.9, 0.3) # Green
 	
-	# Smart HP bar: show if selected OR damaged recently
-	var should_show = selected or (Time.get_ticks_msec() / 1000.0 - last_damage_time < 3.0)
-	hp_bar.get_parent().get_parent().visible = should_show # Sprite3D parent
+	hp_fill_stylebox.bg_color = color
+	hp_fill_stylebox.corner_radius_top_left = 2
+	hp_fill_stylebox.corner_radius_top_right = 2
+	hp_fill_stylebox.corner_radius_bottom_left = 2
+	hp_fill_stylebox.corner_radius_bottom_right = 2
+	
+	# Show HP bar when selected, recently damaged, or not full HP
+	var time_since_damage = Time.get_ticks_msec() / 1000.0 - last_damage_time
+	var should_show = selected or time_since_damage < 3.0 or hp < max_hp
+	hp_sprite.visible = should_show
 
 var is_attack_moving: bool = false
 
 func move_to(pos: Vector3, attack_move: bool = false) -> void:
-	var offset = Vector3(randf_range(-1.5, 1.5), 0, randf_range(-1.5, 1.5))
-	target_position = pos + offset
+	var index := 0
+	if selected:
+		var controller = get_tree().get_first_node_in_group("player_controller")
+		if controller:
+			index = controller.selected_units.find(self)
+			if index == -1: index = 0
+
+	var spacing = 2.0
+	var row = index / 4
+	var col = index % 4
+	var formation_offset = Vector3((col - 1.5) * spacing, 0, row * spacing)
+
+	target_position = pos + formation_offset
 	target_unit = null
 	is_attack_moving = attack_move
 	current_state = State.MOVE
@@ -109,12 +173,17 @@ func take_damage(amount: int, source_pos: Vector3 = Vector3.ZERO) -> void:
 	last_damage_time = Time.get_ticks_msec() / 1000.0
 	_flash_damage()
 	
-	# Hit Knockback / Micro-stun
+	# Hit knockback
 	if source_pos != Vector3.ZERO:
 		var dir = (global_position - source_pos).normalized()
-		velocity += dir * 5.0
-		# Interrupt current state briefly
+		velocity += dir * 3.0
 		_kick_scale(Vector3(1.2, 0.7, 1.2))
+	
+	# Auto-retaliate if idle
+	if current_state == State.IDLE and source_pos != Vector3.ZERO:
+		var attacker = _get_nearest_enemy(auto_aggro_range)
+		if attacker:
+			attack(attacker)
 	
 	if hp <= 0:
 		die()
@@ -126,8 +195,14 @@ func _flash_damage() -> void:
 	var flash_mat = StandardMaterial3D.new()
 	flash_mat.albedo_color = Color.WHITE
 	flash_mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+	flash_mat.emission_enabled = true
+	flash_mat.emission = Color.WHITE
+	flash_mat.emission_energy_multiplier = 3.0
 	mesh.set_surface_override_material(0, flash_mat)
-	get_tree().create_timer(0.1).timeout.connect(func(): mesh.set_surface_override_material(0, _original_material))
+	get_tree().create_timer(0.08).timeout.connect(func(): 
+		if is_instance_valid(self):
+			mesh.set_surface_override_material(0, _original_material)
+	)
 	_play_sound("res://assets/sounds/hit.wav")
 
 func die() -> void:
@@ -152,31 +227,33 @@ func _play_sound(path: String) -> void:
 		sfx.play()
 		sfx.finished.connect(sfx.queue_free)
 
+func _get_nearest_enemy(max_dist: float) -> Node3D:
+	var nearest = null
+	var min_dist = max_dist
+	for unit in UnitRegistry.units:
+		if unit == self: continue
+		if not is_instance_valid(unit): continue
+		if unit.faction_id == faction_id: continue
+		if unit.hp <= 0: continue
+		var d = global_position.distance_to(unit.global_position)
+		if d < min_dist:
+			min_dist = d
+			nearest = unit
+	return nearest
+
 func _process_idle(delta: float) -> void:
-	# Idle breathe
 	mesh.scale = mesh.scale.lerp(Vector3.ONE, delta * 5.0)
-	
-	var units = UnitRegistry.units
-	var nearest_enemy = null
-	var min_dist = 25.0
-	
-	for unit in units:
-		if is_instance_valid(unit) and unit.faction_id != faction_id:
-			var d = global_position.distance_to(unit.global_position)
-			if d < min_dist:
-				min_dist = d
-				nearest_enemy = unit
-	
-	if nearest_enemy:
-		attack(nearest_enemy)
+	# Only auto-aggro at shorter defensive range
+	var enemy = _get_nearest_enemy(auto_aggro_range)
+	if enemy:
+		attack(enemy)
 
 func _process_move(delta: float) -> void:
 	if is_attack_moving:
-		var units = UnitRegistry.units
-		for unit in units:
-			if is_instance_valid(unit) and unit.faction_id != faction_id and global_position.distance_to(unit.global_position) < 15.0:
-				attack(unit)
-				return
+		var enemy = _get_nearest_enemy(auto_aggro_range)
+		if enemy:
+			attack(enemy)
+			return
 
 	if nav_agent.is_navigation_finished():
 		current_state = State.IDLE
@@ -192,22 +269,26 @@ func _process_move(delta: float) -> void:
 	nav_agent.set_velocity(new_velocity)
 	
 	# Procedural walk animation
-	var walk_cycle = sin(Time.get_ticks_msec() * 0.015) * 0.1
+	var walk_cycle = sin(Time.get_ticks_msec() * 0.015) * 0.08
 	mesh.scale.y = 1.0 + walk_cycle
-	mesh.scale.x = 1.0 - walk_cycle
-	mesh.scale.z = 1.0 - walk_cycle
+	mesh.scale.x = 1.0 - walk_cycle * 0.5
+	mesh.scale.z = 1.0 - walk_cycle * 0.5
 	
 	if velocity.length() > 0.5:
 		_smooth_look_at(global_position + velocity, delta)
 
 func _on_velocity_computed(safe_velocity: Vector3) -> void:
-	# Mass-based lerp
-	velocity = velocity.lerp(safe_velocity, 0.15) 
+	velocity = velocity.lerp(safe_velocity, 0.15)
 	move_and_slide()
 
 func _process_attack(delta: float) -> void:
 	if not is_instance_valid(target_unit) or target_unit.hp <= 0:
-		current_state = State.IDLE
+		# Look for a new target before going idle
+		var new_target = _get_nearest_enemy(auto_aggro_range)
+		if new_target:
+			target_unit = new_target
+		else:
+			current_state = State.IDLE
 		return
 		
 	var dist = global_position.distance_to(target_unit.global_position)
@@ -223,12 +304,13 @@ func _process_attack(delta: float) -> void:
 		
 		attack_timer -= delta
 		
-		if attack_timer < 0.2 and attack_timer > 0:
+		if attack_timer < attack_cooldown * 0.35 and attack_timer > 0:
 			mesh.scale = mesh.scale.lerp(Vector3(1.3, 0.7, 1.3), delta * 20.0)
 		elif attack_timer <= 0:
 			_fire_projectile()
+			_play_sound("res://assets/sounds/shoot.wav")
 			attack_timer = attack_cooldown
-			mesh.scale = Vector3(0.7, 1.5, 0.7)
+			mesh.scale = Vector3(1.5, 0.5, 1.5)
 		else:
 			mesh.scale = mesh.scale.lerp(Vector3.ONE, delta * 5.0)
 
@@ -241,6 +323,11 @@ func _fire_projectile() -> void:
 		bullet.target = target_unit
 		bullet.damage = attack_damage
 		bullet.source_unit = self
+		# Set bullet color based on faction
+		if faction_id == 0:
+			bullet.set_color(Color(0.3, 0.6, 1.0)) # Blue projectile for player
+		else:
+			bullet.set_color(Color(1.0, 0.3, 0.2)) # Red projectile for enemy
 
 func _smooth_look_at(target_pos: Vector3, delta: float) -> void:
 	var look_target = Vector3(target_pos.x, global_position.y, target_pos.z)
@@ -261,8 +348,8 @@ func _calculate_separation() -> Vector3:
 
 func on_selected() -> void:
 	selected = true
-	# Selection "Pop"
-	mesh.scale = Vector3(1.4, 0.6, 1.4)
+	# Selection pop effect
+	mesh.scale = Vector3(1.3, 0.7, 1.3)
 
 func on_deselected() -> void:
 	selected = false

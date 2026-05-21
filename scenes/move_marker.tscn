@@ -5,13 +5,16 @@ script/source = "extends MeshInstance3D
 
 func _ready():
 	var tween = create_tween()
-	tween.tween_property(self, \"scale\", Vector3(0.1, 0.1, 0.1), 0.3).from(Vector3(1.5, 1.5, 1.5))
+	tween.tween_property(self, \"scale\", Vector3(0.05, 0.05, 0.05), 0.4).from(Vector3(1.5, 1.5, 1.5))
 	tween.tween_callback(queue_free)
 "
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_marker"]
 shading_mode = 0
-albedo_color = Color(0, 1, 0, 1)
+albedo_color = Color(0.2, 1, 0.4, 1)
+emission_enabled = true
+emission = Color(0.2, 1, 0.4, 1)
+emission_energy_multiplier = 2.0
 
 [sub_resource type="TorusMesh" id="TorusMesh_marker"]
 material = SubResource("StandardMaterial3D_marker")

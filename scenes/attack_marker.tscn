@@ -3,7 +3,10 @@
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_attack"]
 transparency = 1
 shading_mode = 0
-albedo_color = Color(1, 0, 0, 1)
+albedo_color = Color(1, 0.2, 0.1, 1)
+emission_enabled = true
+emission = Color(1, 0.2, 0.1, 1)
+emission_energy_multiplier = 2.0
 
 [sub_resource type="TorusMesh" id="TorusMesh_attack"]
 material = SubResource("StandardMaterial3D_attack")
@@ -14,10 +17,8 @@ outer_radius = 0.5
 script/source = "extends Node3D
 
 func _ready():
-	var mesh_node = $MeshInstance3D
 	var tween = create_tween()
-	tween.tween_property(self, \"scale\", Vector3(1.5, 0.1, 1.5), 0.3)
-	tween.parallel().tween_property(mesh_node, \"transparency\", 1.0, 0.3)
+	tween.tween_property(self, \"scale\", Vector3(2.0, 0.05, 2.0), 0.4).from(Vector3(0.5, 0.5, 0.5))
 	tween.tween_callback(queue_free)
 "
 

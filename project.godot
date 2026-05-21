@@ -25,10 +25,6 @@ window/size/viewport_height=1080
 window/stretch/mode="canvas_items"
 
 [input]
-ui_cancel={
-"deadzone": 0.5,
-"events": []
-}
 
 camera_forward={
 "deadzone": 0.5,
@@ -70,31 +66,7 @@ unit_command={
 "events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":2,"canceled":false,"pressed":false,"double_click":false,"script":null)
 ]
 }
-box_select_start={
-"deadzone": 0.5,
-"events": []
-}
-box_select_end={
-"deadzone": 0.5,
-"events": []
-}
-deselect_all={
-"deadzone": 0.5,
-"events": []
-}
-select_all={
-"deadzone": 0.5,
-"events": []
-}
-pause_game={
-"deadzone": 0.5,
-"events": []
-}
 
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
-ui_cancel={
-"deadzone": 0.5,
-"events": []
-}

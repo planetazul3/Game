@@ -1,21 +1,40 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=8 format=3]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bullet"]
 shading_mode = 0
 albedo_color = Color(1, 1, 0, 1)
+emission_enabled = true
+emission = Color(1, 1, 0, 1)
+emission_energy_multiplier = 3.0
 
 [sub_resource type="SphereMesh" id="SphereMesh_bullet"]
 material = SubResource("StandardMaterial3D_bullet")
-radius = 0.1
-height = 0.2
+radius = 0.12
+height = 0.24
 
 [sub_resource type="GDScript" id="GDScript_bullet"]
 script/source = "extends Node3D
 
 var target: Node3D = null
 var damage: int = 10
-var speed: float = 20.0
+var speed: float = 25.0
 var source_unit: Node3D = null
+var _bullet_color: Color = Color(1, 1, 0, 1)
+
+func set_color(c: Color) -> void:
+	_bullet_color = c
+	var mesh_node = $MeshInstance3D
+	if mesh_node:
+		var mat = StandardMaterial3D.new()
+		mat.shading_mode = StandardMaterial3D.SHADING_MODE_UNSHADED
+		mat.albedo_color = c
+		mat.emission_enabled = true
+		mat.emission = c
+		mat.emission_energy_multiplier = 3.0
+		mesh_node.set_surface_override_material(0, mat)
+	var trail = $Trail
+	if trail:
+		trail.color = c
 
 func _physics_process(delta: float):
 	if not is_instance_valid(target):
@@ -56,8 +75,8 @@ script = SubResource("GDScript_bullet")
 mesh = SubResource("SphereMesh_bullet")
 
 [node name="Trail" type="CPUParticles3D" parent="."]
-amount = 10
-lifetime = 0.2
+amount = 15
+lifetime = 0.3
 mesh = SubResource("SphereMesh_trail")
 gravity = Vector3(0, 0, 0)
 scale_amount_curve = SubResource("Curve_trail")
